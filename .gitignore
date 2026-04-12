@@ -1,0 +1,22 @@
+# Servidor local de desenvolvimento
+serve.ps1
+
+# Claude Code (configurações locais)
+.claude/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Dependências (se adicionar node futuramente)
+node_modules/

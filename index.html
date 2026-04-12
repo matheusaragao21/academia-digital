@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https://randomuser.me https://images.unsplash.com; connect-src https://vtylikgfbdghefyrxeiu.supabase.co; frame-ancestors 'none'; object-src 'none';">
+  <title>Academia Digital — Educação Online</title>
+  <meta name="description" content="Aprenda com especialistas e desenvolva as habilidades que o mercado valoriza. Academia Digital — cursos online para sua carreira.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="index.html" class="navbar-logo">
+    <img src="logo.svg" alt="Academia Digital" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+    <div class="navbar-logo-text" style="display:none">
+      <span>Academia</span><span>DIGITAL</span>
+    </div>
+  </a>
+  <ul class="navbar-links" id="navLinks">
+    <li><a href="index.html" class="btn-nav">Início</a></li>
+    <li><a href="cursos.html">Cursos</a></li>
+    <li><a href="ebooks.html">Ebooks</a></li>
+    <li><a href="#professores">Professores</a></li>
+    <li><a href="blog.html">Blog</a></li>
+  </ul>
+  <div class="hamburger" onclick="toggleMenu()" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-pattern"></div>
+  <div class="hero-content">
+    <div class="hero-tag" id="heroTag">✦ Plataforma de Educação Online ✦</div>
+    <h1 id="heroTitulo">Desenvolva suas <em>Habilidades</em><br>e Avance na Carreira</h1>
+    <p class="hero-desc" id="heroDesc">Aprenda com especialistas do mercado através de cursos práticos e objetivos. Do iniciante ao avançado, no seu ritmo.</p>
+    <div class="hero-btns">
+      <a href="cursos.html" class="btn-primario" id="heroBtn1">✦ Ver Todos os Cursos</a>
+      <a href="blog.html" class="btn-secundario" id="heroBtn2">Conhecer o Blog</a>
+    </div>
+  </div>
+  <div class="hero-scroll">Rolar</div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stats-grid" id="statsBar"></div>
+</div>
+
+<!-- CURSOS EM DESTAQUE -->
+<section class="cursos-section" id="cursos">
+  <div class="secao-titulo">
+    <h2>Cursos em Destaque</h2>
+    <div class="divisor"></div>
+    <p>Escolha seu caminho de aprendizado</p>
+  </div>
+  <div class="cursos-grid" id="cursosDestaque"></div>
+  <div style="text-align:center;margin-top:3rem">
+    <a href="cursos.html" class="btn-secundario">Ver Todos os Cursos →</a>
+  </div>
+</section>
+
+<!-- PROFESSORES -->
+<section class="professores-section" id="professores">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="secao-titulo">
+      <h2>Nossos Professores</h2>
+      <div class="divisor"></div>
+      <p>Especialistas dedicados a transformar sua carreira</p>
+    </div>
+    <div class="professores-grid" id="professoresGrid"></div>
+  </div>
+</section>
+
+<!-- BENEFÍCIOS -->
+<section class="beneficios-section">
+  <div class="secao-titulo">
+    <h2>O que você encontra na Academia Digital</h2>
+    <div class="divisor"></div>
+    <p>Tudo que você precisa para aprender, crescer e se destacar no mercado</p>
+  </div>
+  <div class="beneficios-grid" id="beneficiosGrid"></div>
+</section>
+
+<!-- BLOG PREVIEW -->
+<section class="blog-section" id="blog">
+  <div class="secao-titulo">
+    <h2>Do Blog</h2>
+    <div class="divisor"></div>
+    <p>Reflexões e ensinamentos para aprofundar sua jornada</p>
+  </div>
+  <div class="blog-grid" id="blogPreview"></div>
+  <div style="text-align:center;margin-top:3rem">
+    <a href="blog.html" class="btn-secundario">Ver Todos os Artigos →</a>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="secao-titulo">
+    <h2>Perguntas Frequentes</h2>
+    <div class="divisor"></div>
+  </div>
+  <div class="faq-lista" id="faqLista"></div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2 id="ctaTitulo">Comece Sua Jornada Hoje</h2>
+  <div class="divisor"></div>
+  <p id="ctaDesc">Invista em você. Com uma única compra, acesse o conteúdo para sempre e transforme sua carreira.</p>
+  <a href="cursos.html" class="btn-primario" id="ctaBtn">✦ Ver Todos os Cursos</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <img src="logo.svg" alt="Academia Digital" style="height:50px;margin-bottom:1rem;border-radius:50%"
+           onerror="this.outerHTML='<div style=\'font-size:2.5rem;color:#c9a84c;margin-bottom:1rem\'>🎓</div>'">
+      <p id="footerDesc">Academia Digital é uma plataforma de educação online focada no desenvolvimento profissional e pessoal. Aprenda com especialistas e dê o próximo passo na sua carreira.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Navegação</h4>
+      <ul id="footerNavLinks">
+        <li><a href="cursos.html">Cursos</a></li>
+        <li><a href="ebooks.html">Ebooks</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="#professores">Professores</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Plataformas</h4>
+      <ul id="footerPlataformas">
+        <li><a href="https://hotmart.com" target="_blank">Hotmart</a></li>
+        <li><a href="https://kiwify.com.br" target="_blank">Kiwify</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Academia Digital. Todos os direitos reservados.</span>
+    <a href="admin.html" class="admin-link-oculto">·</a>
+  </div>
+</footer>
+
+<!-- MODAL POST BLOG (homepage) -->
+<div class="post-modal-bg" id="postModal">
+  <div class="post-modal">
+    <button class="post-modal-fechar" onclick="fecharPostModal()">
+      <i data-lucide="x"></i>
+    </button>
+    <div id="postModalConteudo"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="dados.js"></script>
+<script src="storage.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

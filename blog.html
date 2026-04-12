@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https://randomuser.me https://images.unsplash.com; connect-src https://vtylikgfbdghefyrxeiu.supabase.co; frame-ancestors 'none'; object-src 'none';">
+  <title>Blog — Academia Digital</title>
+  <meta name="description" content="Dicas, estratégias e conteúdos para sua carreira. Blog da Academia Digital.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="navbar-logo">
+    <img src="logo.svg" alt="Academia Digital" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+    <div class="navbar-logo-text" style="display:none">
+      <span>Academia</span>
+      <span>DIGITAL</span>
+    </div>
+  </a>
+  <ul class="navbar-links" id="navLinks">
+    <li><a href="index.html" class="btn-nav">Início</a></li>
+    <li><a href="cursos.html">Cursos</a></li>
+    <li><a href="ebooks.html">Ebooks</a></li>
+    <li><a href="index.html#professores">Professores</a></li>
+    <li><a href="blog.html" style="color:var(--dourado)">Blog</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- HEADER -->
+<div class="pagina-header">
+  <h1>Blog da Academia Digital</h1>
+  <div class="divisor"></div>
+  <p>Dicas, estratégias e conteúdos para a sua carreira</p>
+</div>
+
+<!-- POST EM DESTAQUE -->
+<section style="max-width:1100px;margin:0 auto;padding:2rem 2rem 0">
+  <a href="#" class="blog-card" id="postDestaque"
+     style="display:grid;grid-template-columns:1fr 1fr;gap:0;max-width:100%;border-radius:10px;overflow:hidden;margin-bottom:1rem">
+  </a>
+</section>
+
+<!-- TODOS OS POSTS -->
+<section class="blog-section" style="padding-top:2rem">
+  <div class="blog-grid" id="blogGrid"></div>
+</section>
+
+<!-- POST INDIVIDUAL (modal) -->
+<div class="admin-overlay" id="postOverlay" style="background:rgba(4,15,20,0.98)">
+  <button class="btn-fechar" onclick="fecharPost()">✕</button>
+  <div class="post-container" id="postConteudo"></div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <img src="logo.svg" alt="Academia Digital" onerror="this.outerHTML='<div style=\'font-size:2.5rem;color:#c9a84c;margin-bottom:1rem\'>🎓</div>'">
+      <p id="footerDesc">Academia Digital é uma plataforma de educação online focada no desenvolvimento profissional e pessoal.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Navegação</h4>
+      <ul id="footerNavLinks">
+        <li><a href="cursos.html">Cursos</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="index.html#professores">Professores</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Plataformas</h4>
+      <ul id="footerPlataformas">
+        <li><a href="https://hotmart.com" target="_blank" rel="noopener">Hotmart</a></li>
+        <li><a href="https://kiwify.com.br" target="_blank" rel="noopener">Kiwify</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Academia Digital. Todos os direitos reservados.</span>
+    <a href="admin.html" class="admin-link-oculto">·</a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="dados.js"></script>
+<script src="storage.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="app.js"></script>
+<script>
+function escHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+}
+function sanitizeHtml(html) {
+  if (!html) return '';
+  html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  html = html.replace(/\s+on[a-zA-Z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/g, '');
+  html = html.replace(/(href|src|action)\s*=\s*["']\s*javascript:[^"']*/gi, '$1="#"');
+  html = html.replace(/<(iframe|embed|object|form|input|button|textarea|select)\b[^>]*>/gi, '');
+  return html;
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await inicializarDados();
+  const posts = getPosts();
+
+  // Post destaque
+  const dest = posts[0];
+  const destEl = document.getElementById('postDestaque');
+  if (dest && destEl) {
+    const capaDest = dest.thumb
+      ? `<img src="${dest.thumb}" alt="${escHtml(dest.titulo)}" style="width:100%;height:100%;object-fit:cover;display:block;min-height:280px">`
+      : `<div class="blog-capa-placeholder" style="min-height:280px"><i data-lucide="newspaper"></i></div>`;
+    destEl.onclick = () => abrirPost(dest.id);
+    destEl.href = 'javascript:void(0)';
+    destEl.innerHTML = `
+      ${capaDest}
+      <div class="blog-corpo" style="display:flex;flex-direction:column;justify-content:center;padding:2rem">
+        <div class="blog-data">✦ DESTAQUE · ${escHtml(dest.data)}</div>
+        <h2 style="font-size:clamp(1.2rem,2.5vw,1.8rem);color:var(--dourado);margin:.75rem 0">${escHtml(dest.titulo)}</h2>
+        <p style="color:var(--cinza-claro);font-style:italic;line-height:1.7">${escHtml(dest.excerpt)}</p>
+        <span style="margin-top:1.25rem;color:var(--dourado);font-size:.85rem">Ler artigo →</span>
+      </div>`;
+  }
+
+  // Grid de posts (restantes)
+  const grid = document.getElementById('blogGrid');
+  if (grid) {
+    const restantes = posts.slice(1);
+    grid.innerHTML = restantes.length
+      ? restantes.map(p => `
+          <a href="javascript:void(0)" class="blog-card" onclick="abrirPost(${p.id})">
+            ${p.thumb
+              ? `<img src="${p.thumb}" alt="${escHtml(p.titulo)}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block">`
+              : `<div class="blog-capa-placeholder"><i data-lucide="newspaper"></i></div>`}
+            <div class="blog-corpo">
+              <div class="blog-data">${escHtml(p.data)}</div>
+              <h3 class="blog-titulo">${escHtml(p.titulo)}</h3>
+              <p class="blog-excerpt">${escHtml(p.excerpt)}</p>
+            </div>
+          </a>`).join('')
+      : '<p style="color:var(--cinza);text-align:center;padding:3rem">Nenhum post ainda.</p>';
+  }
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+
+function abrirPost(id) {
+  const post = getPosts().find(p => p.id === id);
+  if (!post) return;
+  const el = document.getElementById('postConteudo');
+  el.innerHTML = `
+    <div class="post-header">
+      <div class="post-meta">${escHtml(post.data)}</div>
+      <h1 class="post-titulo">${escHtml(post.titulo)}</h1>
+    </div>
+    <div class="post-corpo">${sanitizeHtml(post.corpo || '')}</div>`;
+  document.getElementById('postOverlay').classList.add('aberto');
+  document.body.style.overflow = 'hidden';
+}
+
+function fecharPost() {
+  document.getElementById('postOverlay').classList.remove('aberto');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharPost(); });
+
+function toggleMenu() {
+  document.getElementById('navLinks').classList.toggle('aberto');
+  document.getElementById('hamburger').classList.toggle('aberto');
+}
+</script>
+</body>
+</html>

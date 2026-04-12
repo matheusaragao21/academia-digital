@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https://randomuser.me https://images.unsplash.com; connect-src https://vtylikgfbdghefyrxeiu.supabase.co; frame-ancestors 'none'; object-src 'none';">
+  <title>Cursos — Academia Digital</title>
+  <meta name="description" content="Todos os cursos da Academia Digital. Encontre o curso certo para o seu desenvolvimento profissional.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="navbar-logo">
+    <img src="logo.svg" alt="Academia Digital" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+    <div class="navbar-logo-text" style="display:none">
+      <span>Academia</span>
+      <span>DIGITAL</span>
+    </div>
+  </a>
+  <ul class="navbar-links" id="navLinks">
+    <li><a href="index.html" class="btn-nav">Início</a></li>
+    <li><a href="cursos.html" style="color:var(--dourado)">Cursos</a></li>
+    <li><a href="ebooks.html">Ebooks</a></li>
+    <li><a href="index.html#professores">Professores</a></li>
+    <li><a href="blog.html">Blog</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+</nav>
+
+<div class="pagina-header">
+  <h1>Todos os Cursos</h1>
+  <div class="divisor"></div>
+  <p>Encontre o curso certo para o seu desenvolvimento profissional</p>
+</div>
+
+<section class="cursos-section" style="padding-top:2rem">
+  <div class="filtros" id="filtros"></div>
+  <div class="cursos-grid" id="todosCursos"></div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <img src="logo.svg" alt="Academia Digital" onerror="this.outerHTML='<div style=\'font-size:2.5rem;color:#c9a84c;margin-bottom:1rem\'>🎓</div>'">
+      <p id="footerDesc">Academia Digital é uma plataforma de educação online focada no desenvolvimento profissional e pessoal.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Navegação</h4>
+      <ul id="footerNavLinks">
+        <li><a href="cursos.html">Cursos</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="index.html#professores">Professores</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Plataformas</h4>
+      <ul id="footerPlataformas">
+        <li><a href="https://hotmart.com" target="_blank" rel="noopener">Hotmart</a></li>
+        <li><a href="https://kiwify.com.br" target="_blank" rel="noopener">Kiwify</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Academia Digital. Todos os direitos reservados.</span>
+    <a href="admin.html" class="admin-link-oculto">·</a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="dados.js"></script>
+<script src="storage.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
