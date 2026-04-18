@@ -143,6 +143,12 @@
 
   <!-- DASHBOARD -->
   <div class="dash" id="dash">
+    <!-- Banner Modo Demo -->
+    <div id="bannerDemo" style="display:none;align-items:center;justify-content:center;gap:.75rem;background:linear-gradient(90deg,#7c4a00,#b36b00);color:#fff;padding:.7rem 1.5rem;font-size:.88rem;letter-spacing:.03em;position:sticky;top:0;z-index:500;text-align:center;flex-wrap:wrap">
+      <span style="font-size:1.1rem">👁️</span>
+      <strong>Modo Demonstração</strong>
+      <span style="opacity:.85">— Você pode explorar tudo livremente. Nenhuma alteração será salva no site real.</span>
+    </div>
     <div class="dash-top">
       <div class="dash-top-logo">
         <img src="logo.svg" alt="Academia Digital" onerror="this.style.display='none'">
@@ -777,6 +783,10 @@ async function entrar() {
       salvarAdmins(admins);
     }
     _sessIniciar();
+    // Ativa modo demo se a conta tiver demo:true
+    window._adminDemo = okAdmin.demo === true;
+    const bannerDemo = document.getElementById('bannerDemo');
+    if (bannerDemo) bannerDemo.style.display = window._adminDemo ? 'flex' : 'none';
     document.getElementById('loginWrap').style.display = 'none';
     document.getElementById('dash').style.cssText = 'display:flex;flex-direction:column';
     await inicializarDados(); // sincroniza Supabase → localStorage antes de renderizar

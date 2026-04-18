@@ -39,6 +39,7 @@ async function sbSync() {
 // ── Envia uma chave ao Supabase (fire-and-forget) ────────────
 async function sbPush(key, value) {
   if (!_SB_KEYS.includes(key)) return; // admins não sobem
+  if (window._adminDemo) return;       // modo demo: nunca salva no Supabase
   const sb = _sb();
   if (!sb) return;
   try {
@@ -182,7 +183,10 @@ function getConfig() {
 function salvarConfig(d) { return storeSet('config', d); }
 
 // ── Admins (local only — não sobem ao Supabase) ──────────────
-const ADMINS_DEFAULT = [{ email: 'admin@academiadigital.com', senha: 'Admin2025' }];
+const ADMINS_DEFAULT = [
+  { email: 'admin@academiadigital.com', senha: 'Admin2025', demo: false },
+  { email: 'demo@academiadigital.com',  senha: 'Demo2025',  demo: true  }
+];
 function getAdmins() {
   const stored = storeGet('admins', null);
   if (!stored || !stored.length) return JSON.parse(JSON.stringify(ADMINS_DEFAULT));
