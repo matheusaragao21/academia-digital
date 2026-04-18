@@ -2,7 +2,7 @@
 
 > Plataforma completa de cursos online construída **100% com IA (Claude)** em uma única sessão — do zero ao produto funcional.
 
-**[🌐 Ver Demo ao Vivo](https://SEU-USUARIO.github.io/academia-digital)**
+**[🌐 Ver Demo ao Vivo](https://matheusaragao21.github.io/academia-digital)**
 
 ---
 
@@ -46,7 +46,7 @@
 
 ```bash
 # Clone o repositório
-git clone https://github.com/SEU-USUARIO/academia-digital.git
+git clone https://github.com/matheusaragao21/academia-digital.git
 cd academia-digital
 
 # Sirva com qualquer servidor estático, ex:
