@@ -1,3 +1,9 @@
+# Painel admin — somente uso local, nunca vai para o repositório público
+admin.html
+
+# Configuração local com credenciais reais (nunca commitar)
+config.js
+
 # Servidor local de desenvolvimento
 serve.ps1
 

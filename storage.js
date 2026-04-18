@@ -2,9 +2,9 @@
 // Dados são lidos/gravados no localStorage (sync) e espelhados no Supabase (async).
 // Senhas de admin ficam APENAS no localStorage — nunca sobem ao Supabase.
 
-// ── Supabase config ─────────────────────────────────────────
-const _SB_URL = 'https://vtylikgfbdghefyrxeiu.supabase.co';
-const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0eWxpa2dmYmRnaGVmeXJ4ZWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3ODI4NDAsImV4cCI6MjA5MTM1ODg0MH0.-q7imO_uTkZnz7fcrlDGpi4bssUu1KybsDysyqrMOf4';
+// ── Supabase config (lida do config.js local — nunca commitado) ──────
+const _SB_URL = (typeof _CFG !== 'undefined') ? _CFG.supabase.url : null;
+const _SB_KEY = (typeof _CFG !== 'undefined') ? _CFG.supabase.key : null;
 // Chaves que sobem ao Supabase (admins ficam só local por segurança)
 const _SB_KEYS = ['cursos','ebooks','posts','professores','faqs','config'];
 
