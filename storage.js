@@ -184,8 +184,8 @@ function salvarConfig(d) { return storeSet('config', d); }
 
 // ── Admins (local only — não sobem ao Supabase) ──────────────
 const ADMINS_DEFAULT = [
-  { email: 'admin@academiadigital.com', senha: 'Admin2025', demo: false },
-  { email: 'demo@academiadigital.com',  senha: 'Demo2025',  demo: true  }
+  { email: 'admin@academiadigital.com', senha: '$sha256:f0d69d50df9d46dbb367d8ab8265d051e4e15cd15277230b5c8cd0b0aba18fca', demo: false },
+  { email: 'demo@academiadigital.com',  senha: '$sha256:3d29c7196c6cbac89fad95a2ea353d25e831ecdcfe77e84f5ba3a84e9afc9c60', demo: true  }
 ];
 function getAdmins() {
   const stored = storeGet('admins', null);
