@@ -123,21 +123,12 @@
 <body>
 <div class="pg">
 
-  <!-- LOGIN -->
-  <div class="login-wrap" id="loginWrap">
+  <!-- LOGIN (oculto no demo — entrada automática) -->
+  <div class="login-wrap" id="loginWrap" style="display:none">
     <div class="login-box">
       <img src="logo.svg" alt="Academia Digital" onerror="this.style.display='none'">
-      <h1>Painel Admin</h1>
-      <p>Acesso exclusivo — Academia Digital</p>
-      <div class="campo"><label>Gmail</label>
-        <input type="text" id="fEmail" placeholder="seu@gmail.com" autocomplete="off" name="ed_user" onkeydown="if(event.key==='Enter')entrar()">
-      </div>
-      <div class="campo"><label>Senha</label>
-        <input type="password" id="fSenha" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter')entrar()">
-      </div>
-      <div class="erro" id="erroLogin">Email ou senha incorretos.</div>
-      <button class="btn-primario" style="width:100%;margin-top:.75rem" onclick="entrar()">Entrar no Painel</button>
-      <a href="index.html" style="display:block;margin-top:1.25rem;color:var(--cinza);font-size:.8rem;text-decoration:none">← Voltar ao site</a>
+      <h1>Painel Demo</h1>
+      <p>Carregando…</p>
     </div>
   </div>
 
@@ -774,21 +765,19 @@ function setRatio(key, value, btn) {
   _ratios[key] = (typeof value === 'number' && !isNaN(value) && value > 0) ? value : NaN;
 }
 
-// ── Auth Demo (sem senha, sem Supabase) ─────────────────────
-async function entrar() { entrarDemo(); } // compat
-
+// ── Auth Demo (entrada automática — sem senha) ──────────────
 async function entrarDemo() {
   document.getElementById('loginWrap').style.display = 'none';
   document.getElementById('dash').style.cssText = 'display:flex;flex-direction:column';
-  await inicializarDados();
+  try { await inicializarDados(); } catch(e) {}
   carregarTudo();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-function sair() {
-  document.getElementById('loginWrap').style.display = 'flex';
-  document.getElementById('dash').style.display = 'none';
-}
+function sair() { /* no-op no demo */ }
+
+// Entra automaticamente ao carregar a página
+document.addEventListener('DOMContentLoaded', function() { entrarDemo(); });
 
 // ── Tabs ────────────────────────────────────────────────────
 function aba(nome, btn) {
