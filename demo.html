@@ -648,10 +648,26 @@
   </div>
 </div>
 
-<!-- DEMO: Supabase SDK e config.js removidos — sem credenciais, sem conexão possível -->
+<!-- DEMO: sem Supabase, sem credenciais, dados sempre do dados.js -->
 <script>
   window._adminDemo = true;
   window.supabase = { createClient: function() { return null; } };
+
+  // Limpa qualquer cache antigo para garantir que dados.js sempre seja usado
+  ['ed_cursos','ed_ebooks','ed_posts','ed_professores','ed_faqs','ed_config'].forEach(function(k) {
+    localStorage.removeItem(k);
+  });
+
+  // Bloqueia escrita no localStorage em modo demo — nada persiste entre sessões
+  const _storeSetOrig = window.storeSet;
+  document.addEventListener('DOMContentLoaded', function() {
+    // Sobrescreve storeSet para no-op total no demo
+    window.storeSet = function(key, data) {
+      // Só atualiza memória interna para que a UI reflita as ações do usuário
+      // mas nunca grava no localStorage nem no Supabase
+      return true;
+    };
+  });
 </script>
 <script src="https://unpkg.com/cropperjs@1.6.2/dist/cropper.min.js"></script>
 <script src="dados.js"></script>
