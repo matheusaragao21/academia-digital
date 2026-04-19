@@ -8,6 +8,16 @@ const _SB_KEY = (typeof _CFG !== 'undefined') ? _CFG.supabase.key : null;
 // Chaves que sobem ao Supabase (admins ficam só local por segurança)
 const _SB_KEYS = ['cursos','ebooks','posts','professores','faqs','config'];
 
+// ── Modo público: sem config.js = GitHub Pages / visitante sem credenciais ──
+// Neste modo, localStorage é ignorado e os dados do dados.js são sempre usados.
+const _MODO_PUBLICO = (typeof _CFG === 'undefined') && !window._adminDemo;
+if (_MODO_PUBLICO) {
+  // Limpa cache antigo para garantir que dados.js seja sempre a fonte de verdade
+  ['ed_cursos','ed_ebooks','ed_posts','ed_professores','ed_faqs','ed_config'].forEach(function(k) {
+    try { localStorage.removeItem(k); } catch(e) {}
+  });
+}
+
 let _sbInst = null;
 function _sb() {
   if (_sbInst) return _sbInst;
@@ -74,6 +84,7 @@ function storeGet(key, fallback) {
 }
 
 function storeSet(key, data) {
+  if (_MODO_PUBLICO) return true; // modo público: nunca persiste (dados sempre do dados.js)
   try {
     const json = JSON.stringify(data);
     const prev = localStorage.getItem(STORE[key]);
