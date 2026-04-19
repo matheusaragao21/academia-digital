@@ -168,7 +168,6 @@
         <button class="tab"     onclick="aba('profs',this)">👤 Professores</button>
         <button class="tab"     onclick="aba('faq',this)">❓ FAQ</button>
         <button class="tab"     onclick="aba('site',this);carregarSite()">🎨 Site</button>
-        <button class="tab"     onclick="aba('acesso',this);carregarAcesso()">🔑 Acesso</button>
       </div>
 
       <!-- Cursos -->
@@ -195,19 +194,6 @@
       <div class="pane" id="pane-faq">
         <button class="btn-novo" onclick="modalFaq()">+ Nova Pergunta</button>
         <div id="listaFaq"></div>
-      </div>
-      <!-- Acesso Admin -->
-      <div class="pane" id="pane-acesso">
-        <p style="color:var(--cinza-claro);font-size:.85rem;margin-bottom:1.25rem;line-height:1.6">
-          Gerencie as contas com acesso ao painel. Cada conta tem um Gmail e uma senha.
-        </p>
-        <button class="btn-novo" onclick="modalAdminAcc()">+ Nova Conta Admin</button>
-        <div id="listaAdmins"></div>
-        <div style="margin-top:1.5rem;padding:1rem 1.25rem;background:rgba(255,100,60,.06);border:1px solid rgba(255,120,60,.2);border-radius:6px">
-          <p style="color:#ffb090;font-size:.78rem;line-height:1.6">
-            ⚠️ <strong>Atenção:</strong> As credenciais são salvas no seu navegador. Não compartilhe acesso ao seu computador com pessoas não autorizadas.
-          </p>
-        </div>
       </div>
 
       <!-- Site Config -->
