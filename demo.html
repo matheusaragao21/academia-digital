@@ -1,0 +1,1772 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Demo — Academia Digital</title>
+  <meta name="robots" content="noindex,nofollow">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https://randomuser.me https://images.unsplash.com; connect-src 'none'; frame-ancestors 'none'; object-src 'none';">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/cropperjs@1.6.2/dist/cropper.min.css">
+  <style>
+    body { background:#040f14; }
+    /* ── Layout ── */
+    .pg { min-height:100vh; display:flex; flex-direction:column; }
+    /* ── Login ── */
+    .login-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem; }
+    .login-box  { width:100%; max-width:420px; background:rgba(13,61,79,.6); border:1px solid rgba(201,168,76,.2); border-radius:12px; padding:3rem 2.5rem; text-align:center; }
+    .login-box img { height:80px; border-radius:50%; margin-bottom:1.25rem; }
+    .login-box h1  { font-size:1.5rem; color:var(--dourado); margin-bottom:.3rem; }
+    .login-box p   { color:var(--cinza); font-style:italic; font-size:.85rem; margin-bottom:1.75rem; }
+    .campo label   { display:block; font-size:.7rem; letter-spacing:.15em; text-transform:uppercase; color:var(--dourado); margin-bottom:.35rem; text-align:left; }
+    .campo         { margin-bottom:1rem; }
+    .campo input, .campo textarea, .campo select {
+      width:100%; padding:.8rem 1rem; background:rgba(255,255,255,.06); border:1px solid rgba(201,168,76,.25);
+      border-radius:5px; color:var(--branco); font-size:.95rem; font-family:'Georgia',serif; transition:border-color .2s; }
+    .campo textarea { min-height:90px; resize:vertical; }
+    .campo input:focus, .campo textarea:focus, .campo select:focus { outline:none; border-color:var(--dourado); }
+    .campo select option { background:#0d3d4f; }
+    .erro { color:#ff6060; font-size:.82rem; margin-top:.5rem; display:none; }
+    /* ── Dashboard ── */
+    .dash { display:none; flex:1; flex-direction:column; }
+    .dash-top { background:rgba(13,61,79,.95); border-bottom:1px solid rgba(201,168,76,.2); padding:1rem 2rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .dash-top-logo { display:flex; align-items:center; gap:.75rem; }
+    .dash-top-logo img { height:36px; border-radius:50%; }
+    .dash-top-logo span { font-size:1rem; color:var(--dourado); font-weight:bold; }
+    .dash-body { max-width:1100px; margin:0 auto; padding:2rem; width:100%; }
+    /* ── Stats cards ── */
+    .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem; }
+    .stat-box  { background:rgba(13,61,79,.8); border:1px solid rgba(201,168,76,.12); border-radius:8px; padding:1.25rem; text-align:center; }
+    .stat-box .n { font-size:2rem; font-weight:bold; color:var(--dourado); display:block; }
+    .stat-box .l { font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--cinza); margin-top:.2rem; }
+    /* ── Tabs ── */
+    .tabs { display:flex; gap:.5rem; margin-bottom:1.5rem; flex-wrap:wrap; border-bottom:1px solid rgba(201,168,76,.15); padding-bottom:1rem; }
+    .tab  { padding:.55rem 1.3rem; border:1px solid rgba(201,168,76,.2); background:transparent; color:var(--cinza-claro); border-radius:5px; cursor:pointer; font-family:'Georgia',serif; font-size:.88rem; transition:all .2s; }
+    .tab.on, .tab:hover { background:var(--dourado); color:var(--azul); border-color:var(--dourado); font-weight:bold; }
+    .pane { display:none; } .pane.on { display:block; }
+    /* ── Item list ── */
+    .item { background:rgba(255,255,255,.04); border:1px solid rgba(201,168,76,.1); border-radius:6px; padding:1rem 1.25rem; margin-bottom:.75rem; display:flex; align-items:center; gap:1rem; transition:border-color .2s; }
+    .item:hover { border-color:rgba(201,168,76,.25); }
+    .item-thumb { width:64px; height:48px; border-radius:4px; object-fit:cover; flex-shrink:0; background:rgba(13,61,79,.8); display:flex; align-items:center; justify-content:center; font-size:1.5rem; overflow:hidden; }
+    .item-thumb img { width:100%; height:100%; object-fit:cover; }
+    .item-info { flex:1; min-width:0; }
+    .item-info h4 { color:var(--branco); font-size:.92rem; margin-bottom:.2rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .item-info span { color:var(--cinza); font-size:.75rem; }
+    .item-destaque { font-size:.65rem; font-weight:bold; letter-spacing:.1em; text-transform:uppercase; padding:.15rem .5rem; border-radius:3px; background:rgba(201,168,76,.15); color:var(--dourado); border:1px solid rgba(201,168,76,.3); }
+    .item-acoes { display:flex; gap:.4rem; flex-shrink:0; flex-wrap:wrap; }
+    .btn-e { padding:.32rem .8rem; border-radius:3px; font-size:.75rem; cursor:pointer; font-family:'Georgia',serif; transition:all .2s; }
+    .btn-abrir  { background:rgba(42,122,138,.2); color:#7dd4e0; border:1px solid rgba(42,122,138,.4); }
+    .btn-editar { background:rgba(201,168,76,.12); color:var(--dourado); border:1px solid rgba(201,168,76,.3); }
+    .btn-toggle { background:rgba(201,168,76,.08); color:var(--cinza-claro); border:1px solid rgba(201,168,76,.2); }
+    .btn-toggle.on { background:rgba(201,168,76,.2); color:var(--dourado); }
+    .btn-del    { background:rgba(255,60,60,.08); color:#ff7070; border:1px solid rgba(255,60,60,.2); }
+    .btn-novo   { display:inline-flex; align-items:center; gap:.4rem; padding:.65rem 1.4rem; background:linear-gradient(135deg,var(--dourado),var(--dourado-escuro)); color:var(--azul); border:none; border-radius:5px; font-size:.88rem; font-weight:bold; cursor:pointer; font-family:'Georgia',serif; margin-bottom:1.25rem; transition:all .2s; }
+    .btn-novo:hover { box-shadow:0 4px 16px rgba(201,168,76,.4); transform:translateY(-1px); }
+    /* ── Modal ── */
+    .modal-bg { display:none; position:fixed; inset:0; background:rgba(4,15,20,.92); z-index:9999; align-items:center; justify-content:center; padding:1rem; overflow-y:auto; }
+    .modal-bg.open { display:flex; }
+    .modal { background:#0d2e3a; border:1px solid rgba(201,168,76,.25); border-radius:10px; width:100%; max-width:560px; padding:2rem; position:relative; max-height:90vh; overflow-y:auto; }
+    .modal h2 { color:var(--dourado); font-size:1.25rem; margin-bottom:1.5rem; }
+    .modal-close { position:absolute; top:1rem; right:1rem; background:transparent; border:1px solid rgba(201,168,76,.2); color:var(--cinza); width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+    .modal-close:hover { border-color:var(--dourado); color:var(--dourado); }
+    .modal-footer { display:flex; gap:.75rem; justify-content:flex-end; margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid rgba(201,168,76,.15); }
+    .btn-salvar { padding:.7rem 1.75rem; background:linear-gradient(135deg,var(--dourado),var(--dourado-escuro)); color:var(--azul); border:none; border-radius:5px; font-size:.95rem; font-weight:bold; cursor:pointer; font-family:'Georgia',serif; }
+    .btn-cancelar { padding:.7rem 1.25rem; background:transparent; color:var(--cinza); border:1px solid rgba(255,255,255,.1); border-radius:5px; font-size:.9rem; cursor:pointer; font-family:'Georgia',serif; }
+    /* ── Thumb preview ── */
+    .thumb-preview { width:100%; height:140px; border:1px dashed rgba(201,168,76,.3); border-radius:5px; display:flex; align-items:center; justify-content:center; color:var(--cinza); font-size:.85rem; font-style:italic; margin-bottom:.5rem; overflow:hidden; background:rgba(13,61,79,.5); cursor:pointer; transition:border-color .2s; }
+    .thumb-preview:hover { border-color:var(--dourado); }
+    .thumb-preview img { width:100%; height:100%; object-fit:cover; }
+    .campo-check { display:flex; align-items:center; gap:.6rem; margin-bottom:1rem; }
+    .campo-check input { width:auto; }
+    .campo-check label { font-size:.88rem; color:var(--cinza-claro); text-transform:none; letter-spacing:0; margin-bottom:0; cursor:pointer; }
+    .thumb-placeholder-txt { color:var(--cinza); font-size:.85rem; font-style:italic; }
+    .thumb-preview img { width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
+    /* Responsivo */
+    @media(max-width:700px){ .stats-row{grid-template-columns:1fr 1fr;} .dash-body{padding:1rem;} .item{flex-direction:column;align-items:flex-start;} .item-acoes{flex-direction:row;} }
+    @media(max-width:480px){ .stats-row{grid-template-columns:1fr 1fr;} }
+    .site-secao { background: rgba(255,255,255,0.03); border: 1px solid rgba(201,168,76,0.12); border-radius:8px; padding:1.5rem; margin-bottom:1.5rem; }
+    .site-secao-titulo { color: var(--dourado); font-size: 1rem; margin-bottom: 1.25rem; padding-bottom: .75rem; border-bottom: 1px solid rgba(201,168,76,0.15); }
+    .stat-admin-row { display:grid; grid-template-columns:1fr 2fr auto; gap:.75rem; margin-bottom:.75rem; align-items:end; }
+    /* Rich text color picker */
+    .rt-color-wrap { position:relative; display:inline-flex; }
+    .rt-color-btn { display:flex; align-items:center; gap:.3rem; }
+    .rt-color-btn span { display:inline-block; width:10px; height:10px; border-radius:50%; border:1px solid rgba(255,255,255,.3); }
+    .rt-color-menu { display:none; position:absolute; top:calc(100% + 4px); left:0; z-index:9999; background:#0d2e3a; border:1px solid rgba(201,168,76,.3); border-radius:6px; padding:.5rem; display:none; gap:.3rem; flex-wrap:wrap; width:152px; box-shadow:0 8px 24px rgba(0,0,0,.5); }
+    .rt-color-menu.open { display:flex; }
+    .rt-color-menu button { width:28px; height:28px; border-radius:4px; border:2px solid transparent; cursor:pointer; transition:transform .15s,border-color .15s; }
+    .rt-color-menu button:hover { transform:scale(1.2); border-color:rgba(255,255,255,.6); }
+    /* Ratio selector */
+    .ratio-sel { display:flex; align-items:center; gap:.3rem; flex-wrap:wrap; margin-bottom:.75rem; }
+    .ratio-sel span { color:var(--cinza); font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; margin-right:.2rem; }
+    .ratio-btn { padding:.25rem .6rem; font-size:.72rem; font-family:Georgia,serif; background:rgba(255,255,255,.05); border:1px solid rgba(201,168,76,.2); color:var(--cinza-claro); border-radius:3px; cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:4px; }
+    .ratio-btn.ativo, .ratio-btn:hover { background:rgba(201,168,76,.2); border-color:var(--dourado); color:var(--dourado); }
+    /* Tiny visual shape inside ratio button */
+    .rv { display:inline-block; background:currentColor; opacity:.5; border-radius:1px; flex-shrink:0; }
+    /* Inline blog image controls */
+    .rt-img-blk { margin:1.5rem 0; display:block; text-align:center; }
+    .rt-img-blk img { border-radius:6px; display:inline-block; }
+    .rt-img-ctrl { display:flex; justify-content:center; gap:4px; padding:5px 6px; background:rgba(10,30,40,.96); border:1px solid rgba(201,168,76,.25); border-top:none; border-radius:0 0 6px 6px; flex-wrap:wrap; }
+    .rt-img-ctrl button { padding:2px 8px; font-size:.7rem; background:rgba(255,255,255,.06); border:1px solid rgba(201,168,76,.2); color:var(--cinza-claro); border-radius:3px; cursor:pointer; font-family:Georgia,serif; transition:all .15s; }
+    .rt-img-ctrl button:hover { background:rgba(201,168,76,.2); color:var(--dourado); border-color:var(--dourado); }
+    .rt-img-ctrl .rt-del { color:#ff9090; border-color:rgba(255,80,80,.3); }
+    .rt-img-ctrl .rt-del:hover { background:rgba(255,60,60,.15); border-color:#ff6060; color:#ff6060; }
+    /* Richtext section label */
+    .rt-section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:.5rem; }
+    .rt-section-tip { font-size:.72rem; color:var(--cinza); font-style:italic; }
+    /* Richtext toolbar — grupos com label */
+    .rt-grp { display:inline-flex; flex-direction:column; gap:3px; }
+    .rt-gl  { font-size:.56rem; letter-spacing:.1em; text-transform:uppercase; color:rgba(138,125,106,.6); text-align:center; line-height:1; padding:0 2px; }
+    .rt-gb  { display:flex; gap:2px; align-items:center; background:rgba(255,255,255,.04); border:1px solid rgba(201,168,76,.13); border-radius:4px; padding:3px 5px; min-height:28px; }
+    .rt-gb-del button { color:#ff9090 !important; }
+  </style>
+</head>
+<body>
+<div class="pg">
+
+  <!-- LOGIN -->
+  <div class="login-wrap" id="loginWrap">
+    <div class="login-box">
+      <img src="logo.svg" alt="Academia Digital" onerror="this.style.display='none'">
+      <h1>Painel Admin</h1>
+      <p>Acesso exclusivo — Academia Digital</p>
+      <div class="campo"><label>Gmail</label>
+        <input type="text" id="fEmail" placeholder="seu@gmail.com" autocomplete="off" name="ed_user" onkeydown="if(event.key==='Enter')entrar()">
+      </div>
+      <div class="campo"><label>Senha</label>
+        <input type="password" id="fSenha" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter')entrar()">
+      </div>
+      <div class="erro" id="erroLogin">Email ou senha incorretos.</div>
+      <button class="btn-primario" style="width:100%;margin-top:.75rem" onclick="entrar()">Entrar no Painel</button>
+      <a href="index.html" style="display:block;margin-top:1.25rem;color:var(--cinza);font-size:.8rem;text-decoration:none">← Voltar ao site</a>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="dash" id="dash">
+    <!-- Banner Modo Demo -->
+    <div id="bannerDemo" style="display:none;align-items:center;justify-content:center;gap:.75rem;background:linear-gradient(90deg,#7c4a00,#b36b00);color:#fff;padding:.7rem 1.5rem;font-size:.88rem;letter-spacing:.03em;position:sticky;top:0;z-index:500;text-align:center;flex-wrap:wrap">
+      <span style="font-size:1.1rem">👁️</span>
+      <strong>Modo Demonstração</strong>
+      <span style="opacity:.85">— Você pode explorar tudo livremente. Nenhuma alteração será salva no site real.</span>
+    </div>
+    <div class="dash-top">
+      <div class="dash-top-logo">
+        <img src="logo.svg" alt="Academia Digital" onerror="this.style.display='none'">
+        <span>Painel Admin · Academia Digital</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+        <a href="index.html" target="_blank" style="color:var(--cinza);font-size:.8rem;text-decoration:none">Ver site →</a>
+        <button class="btn-cancelar" onclick="sair()">Sair</button>
+      </div>
+    </div>
+
+    <div class="dash-body">
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-box"><span class="n" id="stCursos">—</span><div class="l">Cursos</div></div>
+        <div class="stat-box"><span class="n" id="stEbooks">—</span><div class="l">Ebooks</div></div>
+        <div class="stat-box"><span class="n" id="stPosts">—</span><div class="l">Blog Posts</div></div>
+        <div class="stat-box"><span class="n" id="stProfs">—</span><div class="l">Professores</div></div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab on"  onclick="aba('cursos',this)">📚 Cursos</button>
+        <button class="tab"     onclick="aba('ebooks',this)">📘 Ebooks</button>
+        <button class="tab"     onclick="aba('blog',this)">✍️ Blog</button>
+        <button class="tab"     onclick="aba('profs',this)">👤 Professores</button>
+        <button class="tab"     onclick="aba('faq',this)">❓ FAQ</button>
+        <button class="tab"     onclick="aba('site',this);carregarSite()">🎨 Site</button>
+        <button class="tab"     onclick="aba('acesso',this);carregarAcesso()">🔑 Acesso</button>
+      </div>
+
+      <!-- Cursos -->
+      <div class="pane on" id="pane-cursos">
+        <button class="btn-novo" onclick="modalCurso()">+ Novo Curso</button>
+        <div id="listaCursos"></div>
+      </div>
+      <!-- Ebooks -->
+      <div class="pane" id="pane-ebooks">
+        <button class="btn-novo" onclick="modalEbook()">+ Novo Ebook</button>
+        <div id="listaEbooks"></div>
+      </div>
+      <!-- Blog -->
+      <div class="pane" id="pane-blog">
+        <button class="btn-novo" onclick="modalPost()">+ Novo Post</button>
+        <div id="listaBlog"></div>
+      </div>
+      <!-- Professores -->
+      <div class="pane" id="pane-profs">
+        <button class="btn-novo" onclick="modalProf()">+ Novo Professor</button>
+        <div id="listaProfs"></div>
+      </div>
+      <!-- FAQ -->
+      <div class="pane" id="pane-faq">
+        <button class="btn-novo" onclick="modalFaq()">+ Nova Pergunta</button>
+        <div id="listaFaq"></div>
+      </div>
+      <!-- Acesso Admin -->
+      <div class="pane" id="pane-acesso">
+        <p style="color:var(--cinza-claro);font-size:.85rem;margin-bottom:1.25rem;line-height:1.6">
+          Gerencie as contas com acesso ao painel. Cada conta tem um Gmail e uma senha.
+        </p>
+        <button class="btn-novo" onclick="modalAdminAcc()">+ Nova Conta Admin</button>
+        <div id="listaAdmins"></div>
+        <div style="margin-top:1.5rem;padding:1rem 1.25rem;background:rgba(255,100,60,.06);border:1px solid rgba(255,120,60,.2);border-radius:6px">
+          <p style="color:#ffb090;font-size:.78rem;line-height:1.6">
+            ⚠️ <strong>Atenção:</strong> As credenciais são salvas no seu navegador. Não compartilhe acesso ao seu computador com pessoas não autorizadas.
+          </p>
+        </div>
+      </div>
+
+      <!-- Site Config -->
+      <div class="pane" id="pane-site">
+        <!-- Logo -->
+        <div class="site-secao">
+          <h3 class="site-secao-titulo">🖼️ Logo do Site</h3>
+          <p style="color:var(--cinza);font-size:.8rem;margin-bottom:1rem;font-style:italic">A logo aparece na barra de navegação e no rodapé de todas as páginas.</p>
+          <div class="thumb-preview" id="logoThumbPrev" onclick="document.getElementById('logoFile').click()" style="height:100px;max-width:300px">
+            <span class="thumb-placeholder-txt">Clique para adicionar logo</span>
+            <span class="thumb-overlay"><span class="thumb-overlay-icon">📷</span>Alterar logo</span>
+          </div>
+          <input type="file" id="logoFile" accept="image/*" style="display:none" onchange="prevImg(this,'logoThumbPrev','logoBase',NaN)">
+          <input type="hidden" id="logoBase">
+          <div style="display:flex;gap:.75rem;margin-top:.75rem;flex-wrap:wrap">
+            <button class="btn-salvar" onclick="salvarLogo()">Salvar Logo</button>
+            <button class="btn-cancelar" onclick="removerLogo()" style="font-size:.8rem">Remover logo personalizada</button>
+          </div>
+        </div>
+        <!-- Hero -->
+        <div class="site-secao">
+          <h3 class="site-secao-titulo">🏠 Hero — Entrada do Site</h3>
+          <div class="campo"><label>Texto do Badge</label><input type="text" id="sTHeroTag" placeholder="✦ Ensino das Escrituras..."></div>
+          <div class="campo"><label>Título (HTML permitido: &lt;em&gt; para dourado, &lt;br&gt; para quebra)</label><input type="text" id="sTHeroTitulo" placeholder="Abra a &lt;em&gt;Porta&lt;/em&gt;..."></div>
+          <div class="campo"><label>Descrição</label><textarea id="sTHeroDesc"></textarea></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div class="campo"><label>Botão 1 — Texto</label><input type="text" id="sTHeroBtn1txt"></div>
+            <div class="campo"><label>Botão 1 — URL</label><input type="text" id="sTHeroBtn1url"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div class="campo"><label>Botão 2 — Texto</label><input type="text" id="sTHeroBtn2txt"></div>
+            <div class="campo"><label>Botão 2 — URL</label><input type="text" id="sTHeroBtn2url"></div>
+          </div>
+          <button class="btn-salvar" onclick="salvarHero()">Salvar Hero</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="site-secao">
+          <h3 class="site-secao-titulo">📊 Estatísticas</h3>
+          <p style="color:var(--cinza);font-size:.8rem;margin-bottom:1rem;font-style:italic">Use <strong>auto:cursos</strong> ou <strong>auto:professores</strong> para contar automaticamente. Ou escreva qualquer valor (ex: "∞", "500+").</p>
+          <div id="statsAdminRows"></div>
+          <div style="display:flex;gap:.75rem;margin-top:.75rem;flex-wrap:wrap">
+            <button class="btn-novo" style="margin-bottom:0;padding:.5rem 1rem;font-size:.8rem" onclick="adicionarStatRow()">+ Adicionar Stat</button>
+            <button class="btn-salvar" onclick="salvarStats()">Salvar Stats</button>
+          </div>
+        </div>
+
+        <!-- Benefícios -->
+        <div class="site-secao">
+          <h3 class="site-secao-titulo">✨ O que você encontra na Academia Digital</h3>
+          <button class="btn-novo" onclick="modalBeneficio()">+ Adicionar Benefício</button>
+          <div id="listaBeneficios"></div>
+        </div>
+
+        <!-- CTA -->
+        <div class="site-secao">
+          <h3 class="site-secao-titulo">🎯 Chamada Final (CTA)</h3>
+          <div class="campo"><label>Título</label><input type="text" id="sTCtaTitulo"></div>
+          <div class="campo"><label>Descrição</label><textarea id="sTCtaDesc"></textarea></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div class="campo"><label>Botão — Texto</label><input type="text" id="sTCtaBtn"></div>
+            <div class="campo"><label>Botão — URL</label><input type="text" id="sTCtaUrl"></div>
+          </div>
+          <button class="btn-salvar" onclick="salvarCTA()">Salvar CTA</button>
+        </div>
+
+        <!-- Footer -->
+        <div class="site-secao">
+          <h3 class="site-secao-titulo">📝 Rodapé</h3>
+          <!-- Brand description -->
+          <div class="campo"><label>Texto de apresentação da marca</label><textarea id="sTFooterDesc" style="min-height:80px"></textarea></div>
+
+          <!-- Nav links -->
+          <div style="margin-top:1.25rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+              <label style="font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dourado)">Links de Navegação</label>
+              <button class="btn-e btn-editar" onclick="adicionarFooterLink('navLinks')" style="font-size:.75rem">+ Adicionar</button>
+            </div>
+            <div id="footerNavAdmin"></div>
+          </div>
+
+          <!-- Platform links -->
+          <div style="margin-top:1.25rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+              <label style="font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dourado)">Links de Plataformas</label>
+              <button class="btn-e btn-editar" onclick="adicionarFooterLink('plataformas')" style="font-size:.75rem">+ Adicionar</button>
+            </div>
+            <div id="footerPlatAdmin"></div>
+          </div>
+
+          <button class="btn-salvar" onclick="salvarRodape()" style="margin-top:1.25rem">Salvar Rodapé</button>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODAIS ═══════════════ -->
+
+<!-- Modal Curso -->
+<div class="modal-bg" id="mCurso">
+  <div class="modal">
+    <button class="modal-close" onclick="fecharModal('mCurso')">✕</button>
+    <h2 id="mCursoTitulo">Novo Curso</h2>
+    <input type="hidden" id="cId">
+    <div class="thumb-preview" id="cThumbPrev" onclick="document.getElementById('cThumbFile').click()">
+      <span class="thumb-placeholder-txt">Clique para adicionar thumbnail</span>
+      <span class="thumb-overlay"><span class="thumb-overlay-icon">📷</span>Alterar imagem</span>
+    </div>
+    <div class="ratio-sel">
+      <span>Formato:</span>
+      <button type="button" class="ratio-btn ativo" onclick="setRatio('cThumbRatio',16/9,this)"><span class="rv" style="width:16px;height:9px"></span>16:9</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('cThumbRatio',4/3,this)"><span class="rv" style="width:12px;height:9px"></span>4:3</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('cThumbRatio',1,this)"><span class="rv" style="width:9px;height:9px"></span>1:1</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('cThumbRatio',3/4,this)"><span class="rv" style="width:9px;height:12px"></span>3:4</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('cThumbRatio',NaN,this)">Livre</button>
+    </div>
+    <input type="file" id="cThumbFile" accept="image/*" style="display:none" onchange="prevImg(this,'cThumbPrev','cThumbBase',_ratios.cThumbRatio)">
+    <input type="hidden" id="cThumbBase">
+    <div class="campo"><label>Título</label><input type="text" id="cTitulo" placeholder="Nome do curso"></div>
+    <div class="campo"><label>Professor</label>
+      <select id="cProfessor"></select>
+    </div>
+    <div class="campo"><label>Descrição</label><textarea id="cDesc" placeholder="Breve descrição do curso"></textarea></div>
+    <div class="campo"><label>Plataforma</label>
+      <select id="cPlat"><option value="hotmart">Hotmart</option><option value="kiwify">Kiwify</option></select>
+    </div>
+    <div class="campo"><label>URL do Curso (Hotmart / Kiwify)</label><input type="url" id="cUrl" placeholder="https://..."></div>
+    <div class="campo-check">
+      <input type="checkbox" id="cDestaque">
+      <label for="cDestaque">Exibir na página inicial (destaque)</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" onclick="fecharModal('mCurso')">Cancelar</button>
+      <button class="btn-salvar" onclick="salvarCurso()">Salvar Curso</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ebook -->
+<div class="modal-bg" id="mEbook">
+  <div class="modal">
+    <button class="modal-close" onclick="fecharModal('mEbook')">✕</button>
+    <h2 id="mEbookTitulo">Novo Ebook</h2>
+    <input type="hidden" id="eId">
+    <div class="thumb-preview" id="eThumbPrev" onclick="document.getElementById('eThumbFile').click()">
+      <span class="thumb-placeholder-txt">Clique para adicionar capa do ebook</span>
+      <span class="thumb-overlay"><span class="thumb-overlay-icon">📷</span>Alterar imagem</span>
+    </div>
+    <div class="ratio-sel">
+      <span>Formato:</span>
+      <button type="button" class="ratio-btn" onclick="setRatio('eThumbRatio',16/9,this)"><span class="rv" style="width:16px;height:9px"></span>16:9</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('eThumbRatio',4/3,this)"><span class="rv" style="width:12px;height:9px"></span>4:3</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('eThumbRatio',1,this)"><span class="rv" style="width:9px;height:9px"></span>1:1</button>
+      <button type="button" class="ratio-btn ativo" onclick="setRatio('eThumbRatio',3/4,this)"><span class="rv" style="width:9px;height:12px"></span>3:4</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('eThumbRatio',NaN,this)">Livre</button>
+    </div>
+    <input type="file" id="eThumbFile" accept="image/*" style="display:none" onchange="prevImg(this,'eThumbPrev','eThumbBase',_ratios.eThumbRatio)">
+    <input type="hidden" id="eThumbBase">
+    <div class="campo"><label>Título</label><input type="text" id="eTitulo" placeholder="Nome do ebook"></div>
+    <div class="campo"><label>Professor/Autor</label><select id="eProfessor"></select></div>
+    <div class="campo"><label>Descrição</label><textarea id="eDesc"></textarea></div>
+    <div class="campo"><label>Plataforma</label>
+      <select id="ePlat"><option value="hotmart">Hotmart</option><option value="kiwify">Kiwify</option></select>
+    </div>
+    <div class="campo"><label>URL</label><input type="url" id="eUrl" placeholder="https://..."></div>
+    <div class="campo-check">
+      <input type="checkbox" id="eDestaque">
+      <label for="eDestaque">Exibir na página inicial</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" onclick="fecharModal('mEbook')">Cancelar</button>
+      <button class="btn-salvar" onclick="salvarEbook()">Salvar Ebook</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Blog Post -->
+<div class="modal-bg" id="mPost">
+  <div class="modal" style="max-width:720px">
+    <button class="modal-close" onclick="fecharModal('mPost')">✕</button>
+    <h2 id="mPostTitulo">Novo Artigo</h2>
+    <input type="hidden" id="pId">
+    <div class="thumb-preview" id="pThumbPrev" onclick="document.getElementById('pThumbFile').click()">
+      <span class="thumb-placeholder-txt">Clique para adicionar imagem de capa</span>
+      <span class="thumb-overlay"><span class="thumb-overlay-icon">📷</span>Alterar imagem</span>
+    </div>
+    <div class="ratio-sel">
+      <span>Formato da capa:</span>
+      <button type="button" class="ratio-btn ativo" onclick="setRatio('pThumbRatio',16/9,this)"><span class="rv" style="width:16px;height:9px"></span>16:9</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('pThumbRatio',4/3,this)"><span class="rv" style="width:12px;height:9px"></span>4:3</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('pThumbRatio',1,this)"><span class="rv" style="width:9px;height:9px"></span>1:1</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('pThumbRatio',3/4,this)"><span class="rv" style="width:9px;height:12px"></span>3:4</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('pThumbRatio',NaN,this)">Livre</button>
+    </div>
+    <input type="file" id="pThumbFile" accept="image/*" style="display:none" onchange="prevImg(this,'pThumbPrev','pThumbBase',_ratios.pThumbRatio)">
+    <input type="hidden" id="pThumbBase">
+    <div class="campo"><label>Título</label><input type="text" id="pTitulo" placeholder="Título do artigo"></div>
+    <div class="campo"><label>Data</label><input type="text" id="pData" placeholder="ex: 10 de abril de 2025"></div>
+    <div class="campo"><label>Resumo (excerpt)</label><textarea id="pExcerpt" placeholder="Breve resumo que aparece na listagem..."></textarea></div>
+    <div class="campo" style="margin-bottom:0">
+      <div class="rt-section-header">
+        <label style="margin-bottom:0">✍️ Conteúdo Completo</label>
+        <span class="rt-section-tip">Selecione o texto para formatar · 🖼️ para inserir imagem</span>
+      </div>
+    </div>
+    <!-- Toolbar com grupos rotulados -->
+    <div class="richtext-toolbar" id="rtBar" style="margin-bottom:0;border-bottom:none;border-radius:6px 6px 0 0;align-items:flex-end;gap:6px;flex-wrap:wrap">
+
+      <!-- ── BLOCO ── -->
+      <div class="rt-grp">
+        <span class="rt-gl">Bloco</span>
+        <div class="rt-gb">
+          <button type="button" onclick="rt('p')"  title="Parágrafo">¶ Texto</button>
+          <button type="button" onclick="rt('h2')" title="Título grande"><b>T1</b></button>
+          <button type="button" onclick="rt('h3')" title="Título médio"><b>T2</b></button>
+          <button type="button" onclick="rt('h4')" title="Título pequeno"><b>T3</b></button>
+        </div>
+      </div>
+
+      <!-- ── FORMATAÇÃO ── -->
+      <div class="rt-grp">
+        <span class="rt-gl">Formatação</span>
+        <div class="rt-gb">
+          <button type="button" onclick="rt('bold')"         title="Negrito (Ctrl+B)"><b>N</b></button>
+          <button type="button" onclick="rt('italic')"       title="Itálico (Ctrl+I)"><em>It</em></button>
+          <button type="button" onclick="rt('underline')"    title="Sublinhado"><u>Sub</u></button>
+          <button type="button" onclick="rt('strikeThrough')" title="Tachado"><s>Tch</s></button>
+          <div class="rt-color-wrap" title="Cor do texto">
+            <button type="button" class="rt-color-btn" onclick="toggleCorMenu(this)" title="Cor do texto">Cor <span id="rtColorDot" style="background:#ffffff"></span></button>
+            <div class="rt-color-menu" id="rtColorMenu">
+              <button type="button" title="Branco"        onclick="rtCor('#ffffff')" style="background:#ffffff"></button>
+              <button type="button" title="Dourado"       onclick="rtCor('#c9a84c')" style="background:#c9a84c"></button>
+              <button type="button" title="Dourado claro" onclick="rtCor('#e2c97e')" style="background:#e2c97e"></button>
+              <button type="button" title="Cinza claro"   onclick="rtCor('#e8e0d0')" style="background:#e8e0d0"></button>
+              <button type="button" title="Cinza"         onclick="rtCor('#8a7d6a')" style="background:#8a7d6a"></button>
+              <button type="button" title="Vermelho"      onclick="rtCor('#ff6060')" style="background:#ff6060"></button>
+              <button type="button" title="Verde"         onclick="rtCor('#5cb85c')" style="background:#5cb85c"></button>
+              <button type="button" title="Azul claro"    onclick="rtCor('#7dd4e0')" style="background:#7dd4e0"></button>
+              <button type="button" title="Laranja"       onclick="rtCor('#f0a050')" style="background:#f0a050"></button>
+              <button type="button" title="Roxo"          onclick="rtCor('#c0a0e0')" style="background:#c0a0e0"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ALINHAR ── -->
+      <div class="rt-grp">
+        <span class="rt-gl">Alinhar</span>
+        <div class="rt-gb">
+          <button type="button" onclick="rt('justifyLeft')"   title="Esquerda">⬅</button>
+          <button type="button" onclick="rt('justifyCenter')" title="Centro">↔</button>
+          <button type="button" onclick="rt('justifyRight')"  title="Direita">➡</button>
+        </div>
+      </div>
+
+      <!-- ── ESTRUTURA ── -->
+      <div class="rt-grp">
+        <span class="rt-gl">Estrutura</span>
+        <div class="rt-gb">
+          <button type="button" onclick="rt('insertUnorderedList')" title="Lista com pontos">• Lista</button>
+          <button type="button" onclick="rt('insertOrderedList')"   title="Lista numerada">1. Lista</button>
+          <button type="button" onclick="rt('blockquote')"          title="Bloco de citação">❝ Citação</button>
+          <button type="button" onclick="rtDivider()"               title="Linha separadora">— Divisor</button>
+        </div>
+      </div>
+
+      <!-- ── INSERIR ── -->
+      <div class="rt-grp">
+        <span class="rt-gl">Inserir</span>
+        <div class="rt-gb">
+          <button type="button" onclick="rtLink()"        title="Inserir link">🔗 Link</button>
+          <button type="button" onclick="rtInsertImage()" title="Inserir imagem" style="color:#a0d4e0">🖼️ Imagem</button>
+        </div>
+      </div>
+
+      <!-- ── FERRAMENTAS ── -->
+      <div class="rt-grp">
+        <span class="rt-gl">Ferramentas</span>
+        <div class="rt-gb rt-gb-del">
+          <button type="button" onclick="rtPasteClean()"       title="Colar texto limpo (sem formatação)">📋 Colar</button>
+          <button type="button" onclick="rt('removeFormat')"   title="Remover formatação do texto selecionado" style="color:#ff9090">✕ Limpar</button>
+        </div>
+      </div>
+
+    </div>
+    <!-- Editor -->
+    <div class="richtext-editor" id="pCorpoEditor" contenteditable="true"
+         style="border-radius:0 0 6px 6px;min-height:260px"
+         onpaste="rtInterceptPaste(event)"></div>
+    <!-- Blog image insert hidden input -->
+    <input type="file" id="rtImgFile" accept="image/*" style="display:none" onchange="prevImgRtBlog(this)">
+    <div class="ratio-sel" style="margin-top:.75rem">
+      <span>Formato da imagem:</span>
+      <button type="button" class="ratio-btn ativo" onclick="setRatio('rtImgRatio',16/9,this)"><span class="rv" style="width:16px;height:9px"></span>16:9</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('rtImgRatio',4/3,this)"><span class="rv" style="width:12px;height:9px"></span>4:3</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('rtImgRatio',1,this)"><span class="rv" style="width:9px;height:9px"></span>1:1</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('rtImgRatio',3/4,this)"><span class="rv" style="width:9px;height:12px"></span>3:4</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('rtImgRatio',NaN,this)">Livre</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" onclick="fecharModal('mPost')">Cancelar</button>
+      <button class="btn-salvar" onclick="salvarPost()">Salvar Artigo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Professor -->
+<div class="modal-bg" id="mProf">
+  <div class="modal">
+    <button class="modal-close" onclick="fecharModal('mProf')">✕</button>
+    <h2 id="mProfTitulo">Novo Professor</h2>
+    <input type="hidden" id="prId">
+    <div class="thumb-preview" id="prFotoPrev" onclick="document.getElementById('prFotoFile').click()">
+      <span class="thumb-placeholder-txt">Clique para adicionar foto do professor</span>
+      <span class="thumb-overlay"><span class="thumb-overlay-icon">📷</span>Alterar imagem</span>
+    </div>
+    <div class="ratio-sel">
+      <span>Formato da foto:</span>
+      <button type="button" class="ratio-btn" onclick="setRatio('prFotoRatio',16/9,this)"><span class="rv" style="width:16px;height:9px"></span>16:9</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('prFotoRatio',4/3,this)"><span class="rv" style="width:12px;height:9px"></span>4:3</button>
+      <button type="button" class="ratio-btn ativo" onclick="setRatio('prFotoRatio',1,this)"><span class="rv" style="width:9px;height:9px"></span>1:1</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('prFotoRatio',4/5,this)"><span class="rv" style="width:8px;height:10px"></span>4:5</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('prFotoRatio',3/4,this)"><span class="rv" style="width:9px;height:12px"></span>3:4</button>
+      <button type="button" class="ratio-btn" onclick="setRatio('prFotoRatio',NaN,this)">Livre</button>
+    </div>
+    <input type="file" id="prFotoFile" accept="image/*" style="display:none" onchange="prevImg(this,'prFotoPrev','prFotoBase',_ratios.prFotoRatio)">
+    <input type="hidden" id="prFotoBase">
+    <div class="campo"><label>Nome</label><input type="text" id="prNome" placeholder="Nome completo"></div>
+    <div class="campo"><label>Cargo / Especialidade</label><input type="text" id="prTitulo" placeholder="ex: Fundador & Professor"></div>
+    <div class="campo"><label>Bio</label><textarea id="prBio" placeholder="Breve apresentação..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" onclick="fecharModal('mProf')">Cancelar</button>
+      <button class="btn-salvar" onclick="salvarProf()">Salvar Professor</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal FAQ -->
+<div class="modal-bg" id="mFaq">
+  <div class="modal">
+    <button class="modal-close" onclick="fecharModal('mFaq')">✕</button>
+    <h2 id="mFaqTitulo">Nova Pergunta</h2>
+    <input type="hidden" id="fqId">
+    <div class="campo"><label>Pergunta</label><input type="text" id="fqPergunta" placeholder="Ex: Quanto tempo tenho acesso?"></div>
+    <div class="campo"><label>Resposta</label><textarea id="fqResposta" style="min-height:120px" placeholder="Escreva a resposta completa..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" onclick="fecharModal('mFaq')">Cancelar</button>
+      <button class="btn-salvar" onclick="salvarFaq()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Conta Admin -->
+<div class="modal-bg" id="mAdminAcc">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="fecharModal('mAdminAcc')">✕</button>
+    <h2 id="mAdminAccTitulo">Nova Conta Admin</h2>
+    <input type="hidden" id="accIdx">
+    <div class="campo">
+      <label>Gmail / Email</label>
+      <input type="text" id="accEmail" placeholder="email@gmail.com" autocomplete="off">
+    </div>
+    <div class="campo">
+      <label>Senha</label>
+      <input type="password" id="accSenha" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+    </div>
+    <div class="campo">
+      <label>Confirmar Senha</label>
+      <input type="password" id="accSenha2" placeholder="Repita a senha" autocomplete="new-password">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" onclick="fecharModal('mAdminAcc')">Cancelar</button>
+      <button class="btn-salvar" onclick="salvarAdminAcc()">Salvar Conta</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Benefício -->
+<div class="modal-bg" id="mBeneficio">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="fecharModal('mBeneficio')">✕</button>
+    <h2 id="mBeneficioTitulo">Novo Benefício</h2>
+    <input type="hidden" id="bId">
+    <div class="campo">
+      <label>Ícone</label>
+      <select id="bIcone">
+        <option value="library">📚 Biblioteca / Cursos</option>
+        <option value="play-circle">▶ Vídeo / Aulas</option>
+        <option value="scroll">📜 Pergaminho / Escrituras</option>
+        <option value="file-text">📄 Documento / Material</option>
+        <option value="infinity">∞ Infinito / Vitalício</option>
+        <option value="star">⭐ Estrela / Destaque</option>
+        <option value="heart">❤ Coração / Cuidado</option>
+        <option value="shield">🛡 Escudo / Garantia</option>
+        <option value="bookmark">🔖 Marcador / Referência</option>
+        <option value="award">🏆 Prêmio / Certificado</option>
+        <option value="users">👥 Comunidade</option>
+        <option value="globe">🌍 Global / Online</option>
+        <option value="zap">⚡ Rápido / Dinâmico</option>
+        <option value="check-circle">✅ Check / Garantia</option>
+        <option value="graduation-cap">🎓 Graduação / Estudo</option>
+      </select>
+    </div>
+    <div class="campo"><label>Título</label><input type="text" id="bTitulo" placeholder="Ex: Múltiplos Cursos"></div>
+    <div class="campo"><label>Descrição</label><textarea id="bDesc" placeholder="Breve descrição..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" onclick="fecharModal('mBeneficio')">Cancelar</button>
+      <button class="btn-salvar" onclick="salvarBeneficio()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Crop Imagem -->
+<div class="modal-bg" id="mCrop">
+  <div class="modal" style="max-width:640px">
+    <button class="modal-close" onclick="cancelarCrop()">✕</button>
+    <h2>✂️ Ajustar Imagem</h2>
+    <p style="color:var(--cinza);font-size:.8rem;margin-bottom:.75rem;font-style:italic">Arraste para reposicionar · Alças para redimensionar · Scroll para zoom</p>
+    <div class="crop-container">
+      <img id="cropImg" style="max-width:100%;display:block">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" onclick="cancelarCrop()">Cancelar</button>
+      <button class="btn-salvar" onclick="confirmarCrop()">✓ Aplicar Corte</button>
+    </div>
+  </div>
+</div>
+
+<!-- DEMO: Supabase SDK e config.js removidos — sem credenciais, sem conexão possível -->
+<script>
+  window._adminDemo = true;
+  window.supabase = { createClient: function() { return null; } };
+</script>
+<script src="https://unpkg.com/cropperjs@1.6.2/dist/cropper.min.js"></script>
+<script src="dados.js"></script>
+<script src="storage.js"></script>
+<script>
+// ── Segurança: escape HTML ──────────────────────────────────
+function escHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+}
+
+function sanitizeBlogContent(html) {
+  if (!html) return '';
+  html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  html = html.replace(/\s+on[a-zA-Z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/g, '');
+  html = html.replace(/(href|src|action)\s*=\s*["']\s*javascript:[^"']*/gi, '$1="#"');
+  return html;
+}
+
+function isValidUrl(url) {
+  if (!url) return false;
+  try { return ['http:','https:'].includes(new URL(url).protocol); } catch(e) { return false; }
+}
+
+// ── SHA-256 (Web Crypto API) ────────────────────────────────
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return '$sha256:' + Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function verificarSenha(input, stored) {
+  if (!stored) return false;
+  if (stored.startsWith('$sha256:')) {
+    return (await sha256(input)) === stored;
+  }
+  return input === stored; // legacy plain text — migrated on login
+}
+
+// ── Sessão ─────────────────────────────────────────────────
+const _SESS_TIMEOUT = 4 * 60 * 60 * 1000; // 4 horas
+let _sessToken = null;
+let _sessLast  = 0;
+
+function _sessIniciar() {
+  const arr = new Uint8Array(16);
+  crypto.getRandomValues(arr);
+  _sessToken = Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
+  _sessLast  = Date.now();
+  sessionStorage.setItem('ed_tk', _sessToken);
+}
+
+function _sessAtiva() {
+  if (!_sessToken) return false;
+  if (Date.now() - _sessLast > _SESS_TIMEOUT) { sair(); return false; }
+  _sessLast = Date.now();
+  return true;
+}
+
+// Verifica sessão a cada 5 min
+setInterval(() => { if (_sessToken) _sessAtiva(); }, 5 * 60 * 1000);
+// Renova ao interagir
+['click','keydown','mousemove'].forEach(ev =>
+  document.addEventListener(ev, () => { if (_sessToken) _sessLast = Date.now(); }, { passive:true })
+);
+
+// ── Bloqueio por tentativas ─────────────────────────────────
+const _LK_MAX  = 5;
+const _LK_TIME = 15 * 60 * 1000;
+
+function _lkGet() {
+  try { return JSON.parse(sessionStorage.getItem('ed_lk') || '{"c":0,"u":0}'); }
+  catch(e) { return {c:0,u:0}; }
+}
+function _lkSet(o) { sessionStorage.setItem('ed_lk', JSON.stringify(o)); }
+function _lkClear() { sessionStorage.removeItem('ed_lk'); }
+
+// ── Apply logo on page load ─────────────────────────────────
+(function() {
+  try {
+    const cfg = getConfig();
+    if (cfg && cfg.logo) {
+      document.querySelectorAll('img[alt="Academia Digital"]').forEach(img => {
+        img.src = cfg.logo; img.removeAttribute('onerror');
+      });
+    }
+  } catch(e) {}
+})();
+
+// ── Ratio selector ──────────────────────────────────────────
+const _ratios = {
+  cThumbRatio: 16/9,
+  eThumbRatio: 3/4,
+  pThumbRatio: 16/9,
+  prFotoRatio: 1,
+  rtImgRatio:  16/9
+};
+
+function setRatio(key, value, btn) {
+  if (btn) {
+    const grp = btn.closest('.ratio-sel');
+    if (grp) grp.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('ativo'));
+    btn.classList.add('ativo');
+  }
+  _ratios[key] = (typeof value === 'number' && !isNaN(value) && value > 0) ? value : NaN;
+}
+
+// ── Auth Demo (sem senha, sem Supabase) ─────────────────────
+async function entrar() { entrarDemo(); } // compat
+
+async function entrarDemo() {
+  document.getElementById('loginWrap').style.display = 'none';
+  document.getElementById('dash').style.cssText = 'display:flex;flex-direction:column';
+  await inicializarDados();
+  carregarTudo();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function sair() {
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('dash').style.display = 'none';
+}
+
+// ── Tabs ────────────────────────────────────────────────────
+function aba(nome, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('pane-' + nome).classList.add('on');
+}
+
+// ── Carregar listas ─────────────────────────────────────────
+function carregarTudo() {
+  const cs = getCursos(), es = getEbooks(), ps = getPosts(), prs = getProfessores(), fs = getFaqs();
+  document.getElementById('stCursos').textContent = cs.length;
+  document.getElementById('stEbooks').textContent = es.length;
+  document.getElementById('stPosts').textContent  = ps.length;
+  document.getElementById('stProfs').textContent  = prs.length;
+  renderCursos(cs); renderEbooks(es); renderBlog(ps); renderProfs(prs); renderFaqAdmin(fs);
+}
+
+function thumbEl(item) {
+  return item.thumb
+    ? `<div class="item-thumb"><img src="${item.thumb}" alt=""></div>`
+    : `<div class="item-thumb">${item.emoji||'📖'}</div>`;
+}
+
+function fotoEl(prof) {
+  return prof.foto
+    ? `<div class="item-thumb"><img src="${prof.foto}" alt=""></div>`
+    : `<div class="item-thumb">${prof.emoji||'👤'}</div>`;
+}
+
+function renderCursos(lista) {
+  document.getElementById('listaCursos').innerHTML = lista.map((c,i) => `
+    <div class="item" id="ci-${c.id}">
+      ${thumbEl(c)}
+      <div class="item-info">
+        <h4>${escHtml(c.titulo)}</h4>
+        <span>${escHtml(c.professor)} · ${escHtml(c.plataforma)} ${c.destaque ? '· <span class="item-destaque">Destaque</span>' : ''}</span>
+      </div>
+      <div class="item-acoes">
+        ${i>0?`<button class="btn-e btn-toggle" onclick="moverCurso(${c.id},-1)" title="Mover para cima">↑</button>`:''}
+        ${i<lista.length-1?`<button class="btn-e btn-toggle" onclick="moverCurso(${c.id},1)" title="Mover para baixo">↓</button>`:''}
+        <a href="${c.url_externa}" target="_blank" class="btn-e btn-abrir">Abrir</a>
+        <button class="btn-e btn-editar"  onclick="modalCurso(${c.id})">Editar</button>
+        <button class="btn-e btn-toggle ${c.destaque?'on':''}" onclick="toggleDestaqueCurso(${c.id})" title="Destaque homepage">${c.destaque?'★':'☆'} Dest.</button>
+        <button class="btn-e btn-del"     onclick="deletarCurso(${c.id})">Remover</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderEbooks(lista) {
+  document.getElementById('listaEbooks').innerHTML = lista.map((e,i) => `
+    <div class="item" id="ei-${e.id}">
+      ${thumbEl(e)}
+      <div class="item-info">
+        <h4>${escHtml(e.titulo)}</h4>
+        <span>${escHtml(e.professor)} · ${escHtml(e.plataforma)} ${e.destaque ? '· <span class="item-destaque">Destaque</span>' : ''}</span>
+      </div>
+      <div class="item-acoes">
+        ${i>0?`<button class="btn-e btn-toggle" onclick="moverEbook(${e.id},-1)" title="Mover para cima">↑</button>`:''}
+        ${i<lista.length-1?`<button class="btn-e btn-toggle" onclick="moverEbook(${e.id},1)" title="Mover para baixo">↓</button>`:''}
+        <a href="${e.url_externa}" target="_blank" class="btn-e btn-abrir">Abrir</a>
+        <button class="btn-e btn-editar" onclick="modalEbook(${e.id})">Editar</button>
+        <button class="btn-e btn-toggle ${e.destaque?'on':''}" onclick="toggleDestaqueEbook(${e.id})">${e.destaque?'★':'☆'} Dest.</button>
+        <button class="btn-e btn-del"    onclick="deletarEbook(${e.id})">Remover</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderBlog(lista) {
+  document.getElementById('listaBlog').innerHTML = lista.map((p,i) => `
+    <div class="item" id="pi-${p.id}">
+      ${thumbEl(p)}
+      <div class="item-info">
+        <h4>${escHtml(p.titulo)}</h4>
+        <span>${escHtml(p.data)}</span>
+      </div>
+      <div class="item-acoes">
+        ${i>0?`<button class="btn-e btn-toggle" onclick="moverPost(${p.id},-1)" title="Mover para cima">↑</button>`:''}
+        ${i<lista.length-1?`<button class="btn-e btn-toggle" onclick="moverPost(${p.id},1)" title="Mover para baixo">↓</button>`:''}
+        <button class="btn-e btn-editar" onclick="modalPost(${p.id})">Editar</button>
+        <button class="btn-e btn-del"    onclick="deletarPost(${p.id})">Remover</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderProfs(lista) {
+  document.getElementById('listaProfs').innerHTML = lista.map((p,i) => `
+    <div class="item" id="pri-${p.id}">
+      ${fotoEl(p)}
+      <div class="item-info">
+        <h4>${escHtml(p.nome)}</h4>
+        <span>${escHtml(p.titulo)}</span>
+      </div>
+      <div class="item-acoes">
+        ${i>0?`<button class="btn-e btn-toggle" onclick="moverProf(${p.id},-1)" title="Mover para cima">↑</button>`:''}
+        ${i<lista.length-1?`<button class="btn-e btn-toggle" onclick="moverProf(${p.id},1)" title="Mover para baixo">↓</button>`:''}
+        <button class="btn-e btn-editar" onclick="modalProf(${p.id})">Editar</button>
+        <button class="btn-e btn-del"    onclick="deletarProf(${p.id})">Remover</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── Modais helpers ──────────────────────────────────────────
+function abrirModal(id) { document.getElementById(id).classList.add('open'); }
+function fecharModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// ── Image crop (Cropper.js) ─────────────────────────────────
+let _cropperInst = null;
+let _cropCallback = null;
+
+function prevImg(input, prevId, hiddenId, aspect) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = '';  // reset so same file can be re-selected
+  const aspectRatio = (typeof aspect === 'number' && !isNaN(aspect) && aspect > 0) ? aspect : NaN;
+  _cropCallback = (compressed) => {
+    const prev = document.getElementById(prevId);
+    prev.innerHTML = `<img src="${compressed}" alt="preview"><span class="thumb-overlay"><span class="thumb-overlay-icon">📷</span>Alterar imagem</span>`;
+    document.getElementById(hiddenId).value = compressed;
+  };
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const cropImg = document.getElementById('cropImg');
+    if (_cropperInst) { _cropperInst.destroy(); _cropperInst = null; }
+    // Set onload BEFORE src to avoid missing the event on cached images
+    cropImg.onload = () => {
+      _cropperInst = new Cropper(cropImg, {
+        aspectRatio: aspectRatio,
+        viewMode: 2,
+        autoCropArea: 0.9,
+        movable: true,
+        zoomable: true,
+        rotatable: false,
+        scalable: false,
+        background: false
+      });
+    };
+    cropImg.src = '';           // reset to ensure onload fires
+    cropImg.src = ev.target.result;
+    abrirModal('mCrop');
+  };
+  reader.readAsDataURL(file);
+}
+
+function confirmarCrop() {
+  if (!_cropperInst || !_cropCallback) return;
+  const canvas = _cropperInst.getCroppedCanvas({ maxWidth: 900, maxHeight: 700 });
+  const compressed = canvas.toDataURL('image/jpeg', 0.82);
+  _cropCallback(compressed);
+  cancelarCrop();
+}
+
+function cancelarCrop() {
+  if (_cropperInst) { _cropperInst.destroy(); _cropperInst = null; }
+  _cropCallback = null;
+  fecharModal('mCrop');
+}
+
+function resetThumb(prevId, hiddenId, txt) {
+  document.getElementById(prevId).innerHTML = `<span class="thumb-placeholder-txt">${txt}</span><span class="thumb-overlay"><span class="thumb-overlay-icon">📷</span>Adicionar imagem</span>`;
+  document.getElementById(hiddenId).value = '';
+}
+
+function setThumbPrev(prevId, src) {
+  const el = document.getElementById(prevId);
+  if (src) {
+    el.innerHTML = `<img src="${src}" alt=""><span class="thumb-overlay"><span class="thumb-overlay-icon">📷</span>Alterar imagem</span>`;
+  }
+}
+
+// ── Reordenar listas ────────────────────────────────────────
+function moverItem(lista, id, dir) {
+  const idx = lista.findIndex(x => x.id === id);
+  if (idx < 0) return lista;
+  const novo = [...lista];
+  const alvo = idx + dir;
+  if (alvo < 0 || alvo >= novo.length) return novo;
+  [novo[idx], novo[alvo]] = [novo[alvo], novo[idx]];
+  return novo;
+}
+
+function moverCurso(id, dir) {
+  const lista = moverItem(getCursos(), id, dir);
+  salvarCursos(lista); carregarTudo();
+}
+
+function moverPost(id, dir) {
+  const lista = moverItem(getPosts(), id, dir);
+  salvarPosts(lista); carregarTudo();
+}
+
+function moverProf(id, dir) {
+  const lista = moverItem(getProfessores(), id, dir);
+  salvarProfessores(lista); carregarTudo();
+}
+
+function moverEbook(id, dir) {
+  const lista = moverItem(getEbooks(), id, dir);
+  salvarEbooks(lista); carregarTudo();
+}
+
+function preencherProfSelect(selId, valorAtual) {
+  const sel = document.getElementById(selId);
+  sel.innerHTML = getProfessores().map(p =>
+    `<option value="${p.nome}" ${p.nome===valorAtual?'selected':''}>${p.nome}</option>`
+  ).join('');
+}
+
+// ── CRUD Cursos ─────────────────────────────────────────────
+function modalCurso(id) {
+  preencherProfSelect('cProfessor', '');
+  if (id) {
+    const c = getCursos().find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('mCursoTitulo').textContent = 'Editar Curso';
+    document.getElementById('cId').value = id;
+    document.getElementById('cTitulo').value = c.titulo;
+    document.getElementById('cDesc').value = c.descricao;
+    document.getElementById('cPlat').value = c.plataforma;
+    document.getElementById('cUrl').value = c.url_externa;
+    document.getElementById('cDestaque').checked = !!c.destaque;
+    document.getElementById('cThumbBase').value = c.thumb || '';
+    if (c.thumb) setThumbPrev('cThumbPrev', c.thumb);
+    else resetThumb('cThumbPrev','cThumbBase','Clique para adicionar thumbnail (16:9)');
+    preencherProfSelect('cProfessor', c.professor);
+  } else {
+    document.getElementById('mCursoTitulo').textContent = 'Novo Curso';
+    document.getElementById('cId').value = '';
+    document.getElementById('cTitulo').value = '';
+    document.getElementById('cDesc').value = '';
+    document.getElementById('cUrl').value = '';
+    document.getElementById('cDestaque').checked = false;
+    resetThumb('cThumbPrev','cThumbBase','Clique para adicionar thumbnail (16:9)');
+  }
+  abrirModal('mCurso');
+}
+
+function salvarCurso() {
+  const titulo = document.getElementById('cTitulo').value.trim();
+  if (!titulo) { alert('Preencha o título.'); return; }
+  const urlCurso = document.getElementById('cUrl').value.trim();
+  if (urlCurso && !isValidUrl(urlCurso)) { alert('URL inválida. Use https://...'); return; }
+  const lista = getCursos();
+  const id = parseInt(document.getElementById('cId').value) || null;
+  const obj = {
+    id: id || novoId(lista),
+    titulo,
+    professor:   document.getElementById('cProfessor').value,
+    professor_id: getProfessores().findIndex(p => p.nome === document.getElementById('cProfessor').value) + 1,
+    descricao:   document.getElementById('cDesc').value.trim(),
+    plataforma:  document.getElementById('cPlat').value,
+    url_externa: document.getElementById('cUrl').value.trim(),
+    destaque:    document.getElementById('cDestaque').checked,
+    thumb:       document.getElementById('cThumbBase').value || null,
+    thumbRatio:  isNaN(_ratios.cThumbRatio) ? 'auto' : (_ratios.cThumbRatio).toFixed(4),
+    emoji:       id ? (lista.find(x=>x.id===id)||{}).emoji || '📖' : '📖'
+  };
+  if (id) {
+    const idx = lista.findIndex(x => x.id === id);
+    lista[idx] = obj;
+  } else {
+    lista.push(obj);
+  }
+  if (!salvarCursos(lista)) return;
+  fecharModal('mCurso');
+  carregarTudo();
+}
+
+function toggleDestaqueCurso(id) {
+  const lista = getCursos();
+  const idx = lista.findIndex(x => x.id === id);
+  if (idx > -1) { lista[idx].destaque = !lista[idx].destaque; salvarCursos(lista); carregarTudo(); }
+}
+
+function deletarCurso(id) {
+  if (!confirm('Remover este curso?')) return;
+  salvarCursos(getCursos().filter(x => x.id !== id));
+  carregarTudo();
+}
+
+// ── CRUD Ebooks ─────────────────────────────────────────────
+function modalEbook(id) {
+  preencherProfSelect('eProfessor','');
+  if (id) {
+    const e = getEbooks().find(x => x.id === id);
+    if (!e) return;
+    document.getElementById('mEbookTitulo').textContent = 'Editar Ebook';
+    document.getElementById('eId').value = id;
+    document.getElementById('eTitulo').value = e.titulo;
+    document.getElementById('eDesc').value = e.descricao;
+    document.getElementById('ePlat').value = e.plataforma;
+    document.getElementById('eUrl').value = e.url_externa;
+    document.getElementById('eDestaque').checked = !!e.destaque;
+    document.getElementById('eThumbBase').value = e.thumb || '';
+    if (e.thumb) setThumbPrev('eThumbPrev', e.thumb);
+    else resetThumb('eThumbPrev','eThumbBase','Clique para adicionar capa do ebook');
+    preencherProfSelect('eProfessor', e.professor);
+  } else {
+    document.getElementById('mEbookTitulo').textContent = 'Novo Ebook';
+    document.getElementById('eId').value = '';
+    ['eTitulo','eDesc','eUrl'].forEach(i => document.getElementById(i).value = '');
+    document.getElementById('eDestaque').checked = false;
+    resetThumb('eThumbPrev','eThumbBase','Clique para adicionar capa do ebook');
+  }
+  abrirModal('mEbook');
+}
+
+function salvarEbook() {
+  const titulo = document.getElementById('eTitulo').value.trim();
+  if (!titulo) { alert('Preencha o título.'); return; }
+  const urlEbook = document.getElementById('eUrl').value.trim();
+  if (urlEbook && !isValidUrl(urlEbook)) { alert('URL inválida. Use https://...'); return; }
+  const lista = getEbooks();
+  const id = parseInt(document.getElementById('eId').value) || null;
+  const obj = {
+    id: id || novoId(lista),
+    titulo,
+    professor:  document.getElementById('eProfessor').value,
+    descricao:  document.getElementById('eDesc').value.trim(),
+    plataforma: document.getElementById('ePlat').value,
+    url_externa:document.getElementById('eUrl').value.trim(),
+    destaque:   document.getElementById('eDestaque').checked,
+    thumb:      document.getElementById('eThumbBase').value || null,
+    thumbRatio: isNaN(_ratios.eThumbRatio) ? 'auto' : (_ratios.eThumbRatio).toFixed(4),
+    emoji:      id ? (lista.find(x=>x.id===id)||{}).emoji || '📘' : '📘'
+  };
+  if (id) { const i = lista.findIndex(x=>x.id===id); lista[i]=obj; }
+  else lista.push(obj);
+  if (!salvarEbooks(lista)) return;
+  fecharModal('mEbook');
+  carregarTudo();
+}
+
+function toggleDestaqueEbook(id) {
+  const lista = getEbooks();
+  const idx = lista.findIndex(x=>x.id===id);
+  if (idx>-1){ lista[idx].destaque=!lista[idx].destaque; salvarEbooks(lista); carregarTudo(); }
+}
+
+function deletarEbook(id) {
+  if (!confirm('Remover este ebook?')) return;
+  salvarEbooks(getEbooks().filter(x=>x.id!==id));
+  carregarTudo();
+}
+
+// ── CRUD Blog ───────────────────────────────────────────────
+function modalPost(id) {
+  if (id) {
+    const p = getPosts().find(x=>x.id===id);
+    if (!p) return;
+    document.getElementById('mPostTitulo').textContent = 'Editar Artigo';
+    document.getElementById('pId').value = id;
+    document.getElementById('pTitulo').value = p.titulo;
+    document.getElementById('pData').value = p.data;
+    document.getElementById('pExcerpt').value = p.excerpt;
+    document.getElementById('pCorpoEditor').innerHTML = p.corpo || '';
+    document.getElementById('pThumbBase').value = p.thumb || '';
+    if (p.thumb) setThumbPrev('pThumbPrev', p.thumb);
+    else resetThumb('pThumbPrev','pThumbBase','Clique para adicionar imagem de capa');
+    // Re-attach image controls to figures loaded from saved content
+    setTimeout(() => initFigureControls(), 50);
+  } else {
+    document.getElementById('mPostTitulo').textContent = 'Novo Artigo';
+    document.getElementById('pId').value='';
+    ['pTitulo','pData','pExcerpt'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('pCorpoEditor').innerHTML = '';
+    resetThumb('pThumbPrev','pThumbBase','Clique para adicionar imagem de capa');
+  }
+  abrirModal('mPost');
+}
+
+function salvarPost() {
+  const titulo = document.getElementById('pTitulo').value.trim();
+  if (!titulo) { alert('Preencha o título.'); return; }
+  const lista = getPosts();
+  const id = parseInt(document.getElementById('pId').value) || null;
+  const data = document.getElementById('pData').value.trim();
+  // Strip rt-img-ctrl elements before saving (controls are editor-only, not for display)
+  const editorClone = document.getElementById('pCorpoEditor').cloneNode(true);
+  editorClone.querySelectorAll('.rt-img-ctrl').forEach(el => el.remove());
+  editorClone.querySelectorAll('figure').forEach(f => f.removeAttribute('contenteditable'));
+  const obj = {
+    id: id || novoId(lista),
+    titulo,
+    data: data || new Date().toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'}),
+    data_iso: new Date().toISOString().split('T')[0],
+    excerpt: document.getElementById('pExcerpt').value.trim(),
+    corpo:   sanitizeBlogContent(editorClone.innerHTML.trim()),
+    thumb:   document.getElementById('pThumbBase').value || null,
+    thumbRatio: isNaN(_ratios.pThumbRatio) ? 'auto' : (_ratios.pThumbRatio).toFixed(4),
+    emoji:   id ? (lista.find(x=>x.id===id)||{}).emoji || '📝' : '📝',
+    slug:    titulo.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')
+  };
+  if (id) { const i=lista.findIndex(x=>x.id===id); lista[i]=obj; }
+  else lista.push(obj);
+  if (!salvarPosts(lista)) return;
+  fecharModal('mPost');
+  carregarTudo();
+}
+
+function deletarPost(id) {
+  if (!confirm('Remover este artigo?')) return;
+  salvarPosts(getPosts().filter(x=>x.id!==id));
+  carregarTudo();
+}
+
+// ── CRUD Professores ────────────────────────────────────────
+function modalProf(id) {
+  if (id) {
+    const p = getProfessores().find(x=>x.id===id);
+    if (!p) return;
+    document.getElementById('mProfTitulo').textContent = 'Editar Professor';
+    document.getElementById('prId').value = id;
+    document.getElementById('prNome').value = p.nome;
+    document.getElementById('prTitulo').value = p.titulo;
+    document.getElementById('prBio').value = p.bio;
+    document.getElementById('prFotoBase').value = p.foto || '';
+    if (p.foto) setThumbPrev('prFotoPrev', p.foto);
+    else resetThumb('prFotoPrev','prFotoBase','Clique para adicionar foto do professor');
+  } else {
+    document.getElementById('mProfTitulo').textContent = 'Novo Professor';
+    document.getElementById('prId').value='';
+    ['prNome','prTitulo','prBio'].forEach(i=>document.getElementById(i).value='');
+    resetThumb('prFotoPrev','prFotoBase','Clique para adicionar foto do professor');
+  }
+  abrirModal('mProf');
+}
+
+function salvarProf() {
+  const nome = document.getElementById('prNome').value.trim();
+  if (!nome) { alert('Preencha o nome.'); return; }
+  const lista = getProfessores();
+  const id = parseInt(document.getElementById('prId').value) || null;
+  const obj = {
+    id: id || novoId(lista),
+    nome,
+    titulo: document.getElementById('prTitulo').value.trim(),
+    bio:    document.getElementById('prBio').value.trim(),
+    foto:      document.getElementById('prFotoBase').value || null,
+    fotoRatio: isNaN(_ratios.prFotoRatio) ? 'auto' : (_ratios.prFotoRatio).toFixed(4),
+    emoji:  id ? (lista.find(x=>x.id===id)||{}).emoji || '👤' : '👤'
+  };
+  if (id) { const i=lista.findIndex(x=>x.id===id); lista[i]=obj; }
+  else lista.push(obj);
+  if (!salvarProfessores(lista)) return;
+  fecharModal('mProf');
+  carregarTudo();
+}
+
+function deletarProf(id) {
+  if (!confirm('Remover este professor?')) return;
+  salvarProfessores(getProfessores().filter(x=>x.id!==id));
+  carregarTudo();
+}
+
+// ── CRUD FAQ ────────────────────────────────────────────────
+function renderFaqAdmin(lista) {
+  document.getElementById('listaFaq').innerHTML = lista.map((f,i) => `
+    <div class="item">
+      <div class="item-info">
+        <h4>${i+1}. ${escHtml(f.pergunta)}</h4>
+        <span>${escHtml(f.resposta.substring(0,80))}…</span>
+      </div>
+      <div class="item-acoes">
+        <button class="btn-e btn-editar" onclick="modalFaq(${f.id})">Editar</button>
+        <button class="btn-e btn-del"    onclick="deletarFaq(${f.id})">Remover</button>
+      </div>
+    </div>`).join('');
+}
+
+function modalFaq(id) {
+  if (id) {
+    const f = getFaqs().find(x=>x.id===id);
+    if (!f) return;
+    document.getElementById('mFaqTitulo').textContent = 'Editar Pergunta';
+    document.getElementById('fqId').value = id;
+    document.getElementById('fqPergunta').value = f.pergunta;
+    document.getElementById('fqResposta').value = f.resposta;
+  } else {
+    document.getElementById('mFaqTitulo').textContent = 'Nova Pergunta';
+    document.getElementById('fqId').value = '';
+    document.getElementById('fqPergunta').value = '';
+    document.getElementById('fqResposta').value = '';
+  }
+  abrirModal('mFaq');
+}
+
+function salvarFaq() {
+  const pergunta = document.getElementById('fqPergunta').value.trim();
+  const resposta = document.getElementById('fqResposta').value.trim();
+  if (!pergunta || !resposta) { alert('Preencha pergunta e resposta.'); return; }
+  const lista = getFaqs();
+  const id = parseInt(document.getElementById('fqId').value) || null;
+  const obj = { id: id || novoId(lista), pergunta, resposta };
+  if (id) { const i=lista.findIndex(x=>x.id===id); lista[i]=obj; }
+  else lista.push(obj);
+  if (!salvarFaqs(lista)) return;
+  fecharModal('mFaq');
+  carregarTudo();
+}
+
+function deletarFaq(id) {
+  if (!confirm('Remover esta pergunta?')) return;
+  salvarFaqs(getFaqs().filter(x=>x.id!==id));
+  carregarTudo();
+}
+
+// ── CRUD Contas Admin ───────────────────────────────────────
+function carregarAcesso() {
+  renderAdmins(getAdmins());
+}
+
+function renderAdmins(lista) {
+  const el = document.getElementById('listaAdmins');
+  if (!el) return;
+  el.innerHTML = lista.map((a, i) => `
+    <div class="item">
+      <div class="item-thumb" style="font-size:1.2rem;background:rgba(13,61,79,.8)">🔑</div>
+      <div class="item-info">
+        <h4>${a.email}</h4>
+        <span>${lista.length === 1 ? '(conta principal)' : 'Conta admin'}</span>
+      </div>
+      <div class="item-acoes">
+        <button class="btn-e btn-editar" onclick="modalAdminAcc(${i})">Alterar</button>
+        ${lista.length > 1
+          ? `<button class="btn-e btn-del" onclick="deletarAdminAcc(${i})">Remover</button>`
+          : `<button class="btn-e btn-del" disabled style="opacity:.4;cursor:not-allowed" title="Deve haver ao menos 1 conta">Remover</button>`}
+      </div>
+    </div>`).join('');
+}
+
+function modalAdminAcc(idx) {
+  document.getElementById('accSenha').value = '';
+  document.getElementById('accSenha2').value = '';
+  if (typeof idx !== 'undefined') {
+    const a = getAdmins()[idx];
+    if (!a) return;
+    document.getElementById('mAdminAccTitulo').textContent = 'Alterar Conta';
+    document.getElementById('accIdx').value = idx;
+    document.getElementById('accEmail').value = a.email;
+  } else {
+    document.getElementById('mAdminAccTitulo').textContent = 'Nova Conta Admin';
+    document.getElementById('accIdx').value = '';
+    document.getElementById('accEmail').value = '';
+  }
+  abrirModal('mAdminAcc');
+}
+
+async function salvarAdminAcc() {
+  const email = document.getElementById('accEmail').value.trim();
+  const senha = document.getElementById('accSenha').value;
+  const senha2 = document.getElementById('accSenha2').value;
+  if (!email) { alert('Preencha o email.'); return; }
+  if (!email.includes('@')) { alert('Email inválido.'); return; }
+  const idxVal = document.getElementById('accIdx').value;
+  const isEdit = idxVal !== '';
+  if (!isEdit && senha.length < 6) { alert('Senha deve ter pelo menos 6 caracteres.'); return; }
+  if (isEdit && senha && senha.length < 6) { alert('Senha deve ter pelo menos 6 caracteres.'); return; }
+  if (senha && senha !== senha2) { alert('As senhas não coincidem.'); return; }
+  const lista = getAdmins();
+  const idx = parseInt(idxVal);
+  if (isEdit) {
+    lista[idx].email = email;
+    if (senha) lista[idx].senha = await sha256(senha);
+  } else {
+    if (!senha) { alert('Defina uma senha para a nova conta.'); return; }
+    lista.push({ email, senha: await sha256(senha) });
+  }
+  if (!salvarAdmins(lista)) return;
+  fecharModal('mAdminAcc');
+  renderAdmins(lista);
+  alert('✓ Conta salva!');
+}
+
+function deletarAdminAcc(idx) {
+  const lista = getAdmins();
+  if (lista.length <= 1) { alert('Deve haver ao menos uma conta admin.'); return; }
+  if (!confirm(`Remover a conta "${lista[idx].email}"?`)) return;
+  lista.splice(idx, 1);
+  if (!salvarAdmins(lista)) return;
+  renderAdmins(lista);
+}
+
+
+// ── CRUD Site Config ────────────────────────────────────────
+function carregarSite() {
+  const cfg = getConfig();
+  // Logo
+  const logoVal = cfg.logo || '';
+  document.getElementById('logoBase').value = logoVal;
+  if (logoVal) {
+    setThumbPrev('logoThumbPrev', logoVal);
+    document.querySelectorAll('img[alt="Academia Digital"]').forEach(img => { img.src = logoVal; img.removeAttribute('onerror'); });
+  } else {
+    resetThumb('logoThumbPrev', 'logoBase', 'Clique para adicionar logo personalizada');
+  }
+  // Hero
+  document.getElementById('sTHeroTag').value = cfg.hero.tag || '';
+  document.getElementById('sTHeroTitulo').value = cfg.hero.titulo || '';
+  document.getElementById('sTHeroDesc').value = cfg.hero.descricao || '';
+  document.getElementById('sTHeroBtn1txt').value = cfg.hero.btn1txt || '';
+  document.getElementById('sTHeroBtn1url').value = cfg.hero.btn1url || '';
+  document.getElementById('sTHeroBtn2txt').value = cfg.hero.btn2txt || '';
+  document.getElementById('sTHeroBtn2url').value = cfg.hero.btn2url || '';
+  // Stats — dynamic rows
+  document.getElementById('statsAdminRows').innerHTML = '';
+  (cfg.stats || []).forEach(s => adicionarStatRow(s.num, s.label));
+  // Benefits
+  renderBeneficiosAdmin(cfg.beneficios || []);
+  // CTA
+  document.getElementById('sTCtaTitulo').value = cfg.cta.titulo || '';
+  document.getElementById('sTCtaDesc').value = cfg.cta.desc || '';
+  document.getElementById('sTCtaBtn').value = cfg.cta.btnTxt || '';
+  document.getElementById('sTCtaUrl').value = cfg.cta.btnUrl || '';
+  // Footer
+  document.getElementById('sTFooterDesc').value = cfg.footer.desc || '';
+  renderFooterLinksAdmin('navLinks', cfg.footer.navLinks || [], 'footerNavAdmin');
+  renderFooterLinksAdmin('plataformas', cfg.footer.plataformas || [], 'footerPlatAdmin');
+}
+
+function salvarHero() {
+  const cfg = getConfig();
+  cfg.hero = {
+    tag: document.getElementById('sTHeroTag').value.trim(),
+    titulo: document.getElementById('sTHeroTitulo').value.trim(),
+    descricao: document.getElementById('sTHeroDesc').value.trim(),
+    btn1txt: document.getElementById('sTHeroBtn1txt').value.trim(),
+    btn1url: document.getElementById('sTHeroBtn1url').value.trim(),
+    btn2txt: document.getElementById('sTHeroBtn2txt').value.trim(),
+    btn2url: document.getElementById('sTHeroBtn2url').value.trim()
+  };
+  if (salvarConfig(cfg)) alert('✓ Hero salvo! Recarregue o site para ver.');
+}
+
+let _statRowId = 0;
+
+function adicionarStatRow(num = '', label = '') {
+  const id = ++_statRowId;
+  const container = document.getElementById('statsAdminRows');
+  const div = document.createElement('div');
+  div.className = 'stat-admin-row';
+  div.setAttribute('data-stat-id', id);
+  div.innerHTML = `
+    <div class="campo" style="margin:0">
+      <label>Valor</label>
+      <input type="text" class="stat-num-input" value="${num}" placeholder="auto:cursos">
+    </div>
+    <div class="campo" style="margin:0">
+      <label>Label</label>
+      <input type="text" class="stat-lbl-input" value="${label}" placeholder="Cursos Disponíveis">
+    </div>
+    <button type="button" class="btn-e btn-del" onclick="this.closest('[data-stat-id]').remove()" style="height:38px;align-self:flex-end;padding:.3rem .7rem;font-size:1rem" title="Remover">×</button>
+  `;
+  container.appendChild(div);
+}
+
+function salvarStats() {
+  const cfg = getConfig();
+  cfg.stats = Array.from(document.querySelectorAll('#statsAdminRows [data-stat-id]')).map(row => ({
+    num: row.querySelector('.stat-num-input').value.trim(),
+    label: row.querySelector('.stat-lbl-input').value.trim()
+  })).filter(s => s.label);
+  if (salvarConfig(cfg)) alert('✓ Stats salvos! Recarregue o site para ver.');
+}
+
+function salvarLogo() {
+  const val = document.getElementById('logoBase').value;
+  const cfg = getConfig();
+  cfg.logo = val || null;
+  if (!salvarConfig(cfg)) return;
+  // Apply immediately in admin UI
+  if (val) {
+    document.querySelectorAll('img[alt="Academia Digital"]').forEach(img => { img.src = val; });
+  }
+  alert('✓ Logo salva! Recarregue o site para ver a logo em todas as páginas.');
+}
+
+function removerLogo() {
+  if (!confirm('Remover a logo personalizada e voltar à logo padrão (logo.svg)?')) return;
+  const cfg = getConfig();
+  cfg.logo = null;
+  if (!salvarConfig(cfg)) return;
+  document.getElementById('logoBase').value = '';
+  resetThumb('logoThumbPrev', 'logoBase', 'Clique para adicionar logo personalizada');
+  document.querySelectorAll('img[alt="Academia Digital"]').forEach(img => { img.src = 'logo.svg'; });
+  alert('✓ Logo removida. A logo.svg padrão será usada.');
+}
+
+function renderBeneficiosAdmin(lista) {
+  document.getElementById('listaBeneficios').innerHTML = lista.map(b => `
+    <div class="item">
+      <div class="item-thumb" style="font-size:1.2rem;background:rgba(13,61,79,.8)">${b.icone}</div>
+      <div class="item-info">
+        <h4>${escHtml(b.titulo)}</h4>
+        <span>${escHtml(b.desc.substring(0,60))}…</span>
+      </div>
+      <div class="item-acoes">
+        <button class="btn-e btn-editar" onclick="modalBeneficio(${b.id})">Editar</button>
+        <button class="btn-e btn-del" onclick="deletarBeneficio(${b.id})">Remover</button>
+      </div>
+    </div>`).join('');
+}
+
+function modalBeneficio(id) {
+  const cfg = getConfig();
+  if (id) {
+    const b = (cfg.beneficios||[]).find(x=>x.id===id);
+    if (!b) return;
+    document.getElementById('mBeneficioTitulo').textContent = 'Editar Benefício';
+    document.getElementById('bId').value = id;
+    document.getElementById('bIcone').value = b.icone;
+    document.getElementById('bTitulo').value = b.titulo;
+    document.getElementById('bDesc').value = b.desc;
+  } else {
+    document.getElementById('mBeneficioTitulo').textContent = 'Novo Benefício';
+    document.getElementById('bId').value = '';
+    document.getElementById('bIcone').value = 'library';
+    document.getElementById('bTitulo').value = '';
+    document.getElementById('bDesc').value = '';
+  }
+  abrirModal('mBeneficio');
+}
+
+function salvarBeneficio() {
+  const titulo = document.getElementById('bTitulo').value.trim();
+  if (!titulo) { alert('Preencha o título.'); return; }
+  const cfg = getConfig();
+  const lista = cfg.beneficios || [];
+  const id = parseInt(document.getElementById('bId').value) || null;
+  const obj = { id: id || novoId(lista), icone: document.getElementById('bIcone').value, titulo, desc: document.getElementById('bDesc').value.trim() };
+  if (id) { const i = lista.findIndex(x=>x.id===id); lista[i]=obj; } else lista.push(obj);
+  cfg.beneficios = lista;
+  if (!salvarConfig(cfg)) return;
+  fecharModal('mBeneficio');
+  renderBeneficiosAdmin(lista);
+}
+
+function deletarBeneficio(id) {
+  if (!confirm('Remover este benefício?')) return;
+  const cfg = getConfig();
+  cfg.beneficios = (cfg.beneficios||[]).filter(x=>x.id!==id);
+  salvarConfig(cfg);
+  renderBeneficiosAdmin(cfg.beneficios);
+}
+
+function salvarCTA() {
+  const cfg = getConfig();
+  cfg.cta = {
+    titulo: document.getElementById('sTCtaTitulo').value.trim(),
+    desc: document.getElementById('sTCtaDesc').value.trim(),
+    btnTxt: document.getElementById('sTCtaBtn').value.trim(),
+    btnUrl: document.getElementById('sTCtaUrl').value.trim()
+  };
+  if (salvarConfig(cfg)) alert('✓ CTA salvo!');
+}
+
+function salvarRodape() {
+  const cfg = getConfig();
+  cfg.footer = {
+    desc: document.getElementById('sTFooterDesc').value.trim(),
+    navLinks: coletarFooterLinks('footerNavAdmin'),
+    plataformas: coletarFooterLinks('footerPlatAdmin')
+  };
+  if (salvarConfig(cfg)) alert('✓ Rodapé salvo! Recarregue o site para ver.');
+}
+
+function renderFooterLinksAdmin(tipo, lista, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = lista.map((l, i) => `
+    <div class="stat-admin-row" data-footer-link="${i}" style="margin-bottom:.5rem">
+      <div class="campo" style="margin:0">
+        <label>Texto</label>
+        <input type="text" class="fl-texto" value="${l.texto}" placeholder="Cursos">
+      </div>
+      <div class="campo" style="margin:0">
+        <label>URL</label>
+        <input type="text" class="fl-url" value="${l.url}" placeholder="cursos.html">
+      </div>
+      <button type="button" class="btn-e btn-del" onclick="this.closest('[data-footer-link]').remove()"
+        style="height:38px;align-self:flex-end;padding:.3rem .7rem;font-size:1rem" title="Remover">×</button>
+    </div>`).join('');
+}
+
+function coletarFooterLinks(containerId) {
+  return Array.from(document.querySelectorAll('#' + containerId + ' [data-footer-link]')).map(row => ({
+    texto: row.querySelector('.fl-texto').value.trim(),
+    url:   row.querySelector('.fl-url').value.trim()
+  })).filter(l => l.texto);
+}
+
+function adicionarFooterLink(tipo) {
+  const containerId = tipo === 'navLinks' ? 'footerNavAdmin' : 'footerPlatAdmin';
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const idx = container.querySelectorAll('[data-footer-link]').length;
+  const div = document.createElement('div');
+  div.className = 'stat-admin-row';
+  div.setAttribute('data-footer-link', idx);
+  div.style.marginBottom = '.5rem';
+  div.innerHTML = `
+    <div class="campo" style="margin:0">
+      <label>Texto</label>
+      <input type="text" class="fl-texto" value="" placeholder="${tipo === 'navLinks' ? 'Cursos' : 'Hotmart'}">
+    </div>
+    <div class="campo" style="margin:0">
+      <label>URL</label>
+      <input type="text" class="fl-url" value="" placeholder="${tipo === 'navLinks' ? 'cursos.html' : 'https://hotmart.com'}">
+    </div>
+    <button type="button" class="btn-e btn-del" onclick="this.closest('[data-footer-link]').remove()"
+      style="height:38px;align-self:flex-end;padding:.3rem .7rem;font-size:1rem" title="Remover">×</button>
+  `;
+  container.appendChild(div);
+}
+
+// ── Rich text editor ─────────────────────────────────────────
+function rt(cmd) {
+  const ed = document.getElementById('pCorpoEditor');
+  ed.focus();
+  if (['h2','h3','h4','p','blockquote','pre'].includes(cmd)) {
+    document.execCommand('formatBlock', false, '<' + cmd + '>');
+  } else {
+    document.execCommand(cmd, false, null);
+  }
+}
+
+function rtCor(cor) {
+  const ed = document.getElementById('pCorpoEditor');
+  ed.focus();
+  document.execCommand('foreColor', false, cor);
+  document.getElementById('rtColorDot').style.background = cor;
+  document.getElementById('rtColorMenu').classList.remove('open');
+}
+
+function toggleCorMenu(btn) {
+  const menu = document.getElementById('rtColorMenu');
+  menu.classList.toggle('open');
+  // Close if clicking elsewhere
+  const close = (e) => {
+    if (!btn.closest('.rt-color-wrap').contains(e.target)) {
+      menu.classList.remove('open');
+      document.removeEventListener('click', close);
+    }
+  };
+  if (menu.classList.contains('open')) {
+    setTimeout(() => document.addEventListener('click', close), 10);
+  }
+}
+
+function rtDivider() {
+  const ed = document.getElementById('pCorpoEditor');
+  ed.focus();
+  document.execCommand('insertHTML', false, '<hr style="border:none;border-top:1px solid rgba(201,168,76,0.3);margin:1.5rem 0">');
+}
+
+function rtLink() {
+  const url = prompt('URL do link (ex: https://escoladalet.com):');
+  if (!url) return;
+  const texto = window.getSelection().toString() || url;
+  const ed = document.getElementById('pCorpoEditor');
+  ed.focus();
+  document.execCommand('insertHTML', false, `<a href="${url}" target="_blank" style="color:var(--dourado,#c9a84c);text-decoration:underline">${texto}</a>`);
+}
+
+// ── Controles de imagem no editor ──────────────────────────
+function rtFigCtrlHTML() {
+  return `<div class="rt-img-ctrl" contenteditable="false">
+    <button type="button" onclick="rtFigSize(this.closest('figure'),25)" title="Largura 25%">25%</button>
+    <button type="button" onclick="rtFigSize(this.closest('figure'),50)" title="Largura 50%">50%</button>
+    <button type="button" onclick="rtFigSize(this.closest('figure'),75)" title="Largura 75%">75%</button>
+    <button type="button" onclick="rtFigSize(this.closest('figure'),100)" title="Largura 100%">100%</button>
+    <button type="button" onclick="rtFigAlign(this.closest('figure'),'left')" title="Alinhar à esquerda">⬅</button>
+    <button type="button" onclick="rtFigAlign(this.closest('figure'),'center')" title="Centralizar">↔</button>
+    <button type="button" onclick="rtFigAlign(this.closest('figure'),'right')" title="Alinhar à direita">➡</button>
+    <button type="button" class="rt-del" onclick="rtFigDel(this.closest('figure'))" title="Remover imagem">✕ Remover</button>
+  </div>`;
+}
+
+function rtFigSize(fig, pct) {
+  if (!fig) return;
+  const img = fig.querySelector('img');
+  if (img) img.style.width = pct + '%';
+}
+
+function rtFigAlign(fig, align) {
+  if (!fig) return;
+  fig.style.textAlign = align;
+}
+
+function rtFigDel(fig) {
+  if (!fig) return;
+  if (confirm('Remover esta imagem do artigo?')) fig.remove();
+}
+
+function initFigureControls(editorEl) {
+  // Re-attach controls to bare figures loaded from saved content
+  if (!editorEl) editorEl = document.getElementById('pCorpoEditor');
+  editorEl.querySelectorAll('figure').forEach(fig => {
+    fig.setAttribute('contenteditable', 'false');
+    if (!fig.querySelector('.rt-img-ctrl')) {
+      fig.insertAdjacentHTML('beforeend', rtFigCtrlHTML());
+    }
+  });
+}
+
+function rtInsertImage() {
+  // Save current selection
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount > 0) {
+    window._rtImgRange = sel.getRangeAt(0).cloneRange();
+  }
+  // Override crop callback to insert into editor with controls
+  _cropCallback = (compressed) => {
+    const edEl = document.getElementById('pCorpoEditor');
+    edEl.focus();
+    if (window._rtImgRange) {
+      const sel2 = window.getSelection();
+      sel2.removeAllRanges();
+      sel2.addRange(window._rtImgRange);
+    }
+    document.execCommand('insertHTML', false,
+      `<figure class="rt-img-blk" contenteditable="false" style="text-align:center;margin:1.5rem 0;display:block"><img src="${compressed}" style="max-width:100%;width:100%;border-radius:6px;display:inline-block">${rtFigCtrlHTML()}</figure><p><br></p>`
+    );
+    window._rtImgRange = null;
+  };
+  const inp = document.getElementById('rtImgFile');
+  if (inp) { inp.value = ''; inp.click(); }
+}
+
+function prevImgRtBlog(input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = '';
+  const aspect = _ratios.rtImgRatio;
+  const aspectRatio = (!isNaN(aspect) && aspect > 0) ? aspect : NaN;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const cropImg = document.getElementById('cropImg');
+    if (_cropperInst) { _cropperInst.destroy(); _cropperInst = null; }
+    // Set onload BEFORE src to avoid missing the event on cached images
+    cropImg.onload = () => {
+      _cropperInst = new Cropper(cropImg, {
+        aspectRatio,
+        viewMode: 2,
+        autoCropArea: 0.9,
+        movable: true,
+        zoomable: true,
+        rotatable: false,
+        scalable: false,
+        background: false
+      });
+    };
+    cropImg.src = '';           // reset to ensure onload fires
+    cropImg.src = ev.target.result;
+    abrirModal('mCrop');
+  };
+  reader.readAsDataURL(file);
+}
+
+function rtPasteClean() {
+  const ed = document.getElementById('pCorpoEditor');
+  ed.focus();
+  const texto = prompt('Cole o texto aqui e ele será inserido sem formatação:');
+  if (texto === null) return;
+  document.execCommand('insertText', false, texto);
+}
+
+function rtInterceptPaste(e) {
+  // Allow paste but clean HTML — keep only plain text from clipboard
+  const clipData = e.clipboardData || window.clipboardData;
+  if (!clipData) return;
+  const html = clipData.getData('text/html');
+  const plain = clipData.getData('text/plain');
+  // If pasting HTML from external source (Word, Google Docs), clean it
+  if (html && html.includes('google') || html && html.includes('MsoNormal') || html && html.includes('Word')) {
+    e.preventDefault();
+    document.execCommand('insertText', false, plain);
+  }
+  // Otherwise allow natural paste (preserves our own formatting)
+}
+
+// ── Fechar modal com ESC / clique fora ──────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-bg.open').forEach(m => m.classList.remove('open'));
+});
+// Fechar ao clicar FORA do modal (no fundo escuro)
+document.querySelectorAll('.modal').forEach(m => {
+  m.addEventListener('click', e => e.stopPropagation());
+});
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', () => bg.classList.remove('open'));
+});
+</script>
+</body>
+</html>
+
