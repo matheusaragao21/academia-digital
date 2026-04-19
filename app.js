@@ -137,7 +137,7 @@ function fecharPostModal() {
 
 // ── Renderização homepage ───────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-  await inicializarDados(); // carrega dados frescos do Supabase
+  try { await inicializarDados(); } catch(e) { console.warn('[app] inicializarDados falhou:', e); }
   const cfg = getConfig();
 
   // Stats

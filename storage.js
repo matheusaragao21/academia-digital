@@ -21,8 +21,9 @@ if (_MODO_PUBLICO) {
 let _sbInst = null;
 function _sb() {
   if (_sbInst) return _sbInst;
+  if (!_SB_URL || !_SB_KEY) return null; // sem credenciais → não cria cliente
   if (typeof supabase !== 'undefined' && supabase.createClient) {
-    _sbInst = supabase.createClient(_SB_URL, _SB_KEY);
+    try { _sbInst = supabase.createClient(_SB_URL, _SB_KEY); } catch(e) { return null; }
   }
   return _sbInst;
 }
