@@ -44,7 +44,9 @@ const CURSOS = [
 const EBOOKS = [
   { id:1, titulo:"Guia Definitivo de Produtividade",        professor:"André Costa",      descricao:"Métodos, ferramentas e estratégias para organizar sua rotina e multiplicar seus resultados profissionais.",      plataforma:"hotmart", url_externa:"https://hotmart.com",   thumb:"https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=400&h=560&fit=crop&auto=format",  emoji:"📘", destaque:true  },
   { id:2, titulo:"Marketing de Conteúdo Descomplicado",     professor:"Juliana Ferreira", descricao:"Como criar e distribuir conteúdo que atrai, engaja e converte clientes para o seu negócio digital.",            plataforma:"hotmart", url_externa:"https://hotmart.com",   thumb:"https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=400&h=560&fit=crop&auto=format",  emoji:"📗", destaque:true  },
-  { id:3, titulo:"Primeiros Passos no Empreendedorismo",    professor:"Ricardo Mendes",   descricao:"Um guia prático para quem está começando: validação de ideias, modelo de negócios e primeiros clientes.",       plataforma:"kiwify",  url_externa:"https://kiwify.com.br", thumb:"https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400&h=560&fit=crop&auto=format",  emoji:"📙", destaque:true  }
+  { id:3, titulo:"Primeiros Passos no Empreendedorismo",    professor:"Ricardo Mendes",   descricao:"Um guia prático para quem está começando: validação de ideias, modelo de negócios e primeiros clientes.",       plataforma:"kiwify",  url_externa:"https://kiwify.com.br", thumb:"https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400&h=560&fit=crop&auto=format",  emoji:"📙", destaque:true  },
+  { id:4, titulo:"LinkedIn que Atrai Oportunidades",        professor:"Juliana Ferreira", descricao:"Passo a passo para transformar seu perfil no LinkedIn em uma máquina de atrair recrutadores, clientes e parceiros.", plataforma:"hotmart", url_externa:"https://hotmart.com",   thumb:"https://images.unsplash.com/photo-1611944212129-29977ae1398c?w=400&h=560&fit=crop&auto=format",  emoji:"💼", destaque:false },
+  { id:5, titulo:"Gestão Financeira para Autônomos",        professor:"André Costa",      descricao:"Como organizar as finanças do seu negócio freelance: precificação, controle de caixa e planejamento de impostos.",  plataforma:"kiwify",  url_externa:"https://kiwify.com.br", thumb:"https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=560&fit=crop&auto=format",  emoji:"💹", destaque:false }
 ];
 
 const FAQS = [
@@ -105,7 +107,7 @@ const POSTS_BLOG = [
     excerpt: "Em um mundo em constante transformação, aprender é o único ativo que ninguém pode tirar de você. Entenda o retorno real do investimento em conhecimento.",
     emoji: "🎓",
     slug: "investir-em-educacao",
-    thumb: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=450&fit=crop&auto=format",
+    thumb: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&h=450&fit=crop&auto=format",
     corpo: `<p>Existe um investimento que nunca desvaloriza, não sofre com inflação e cresce com o tempo: o conhecimento. Em um mundo onde o capital físico pode ser perdido e os mercados oscilam, o que você aprende fica com você para sempre.</p>
 <h2>O retorno sobre o aprendizado</h2>
 <p>Estudos globais mostram consistentemente que cada ano adicional de educação aumenta em média 8 a 10% a renda de um profissional ao longo da carreira. Mas além do retorno financeiro direto, o conhecimento abre portas, cria redes e amplia horizontes.</p>
